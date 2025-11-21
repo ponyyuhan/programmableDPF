@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/pdpf_tests.dir/pdpf/tests/test_pdpf.cpp.o -o pdpf_tests  libpdpf.a
