@@ -3,9 +3,10 @@
 // ================================================================
 
 #include "pdpf/prg/prg.hpp"
-#include <cstring>
-#include <random>
 #include <array>
+#include <cstdint>
+#include <cstring>
+#include <CommonCrypto/CommonCryptor.h>
 
 namespace pdpf::prg {
 
@@ -17,25 +18,39 @@ AesCtrPrg::AesCtrPrg(const core::Seed &master_key)
 void AesCtrPrg::expand(const core::Seed &seed,
                        core::Seed &left,
                        core::Seed &right) const {
-    // Deterministic fallback PRG: use std::mt19937_64 keyed by master_key_ XOR seed bytes.
-    // This is *not* cryptographically secure and should be replaced with AES-CTR or ChaCha20.
-    std::uint64_t acc = 0;
-    for (auto b : master_key_) { acc = (acc << 5) ^ (acc >> 2) ^ b; }
-    for (auto b : seed)       { acc = (acc << 5) ^ (acc >> 2) ^ b; }
+    // AES-CTR using CommonCrypto, producing 32 bytes from counter=0 and counter=1.
+    std::uint8_t iv[16];
+    std::memcpy(iv, seed.data(), 16);
 
-    std::seed_seq seq{static_cast<unsigned int>(acc & 0xffffffffu),
-                      static_cast<unsigned int>((acc >> 32) & 0xffffffffu)};
-    std::mt19937_64 rng(seq);
-
-    auto fill_seed = [&rng](core::Seed &dst) {
-        for (std::size_t i = 0; i < dst.size(); ++i) {
-            auto v = static_cast<std::uint8_t>(rng() & 0xFFu);
-            dst[i] = v;
+    auto encrypt_block = [&](std::uint64_t counter, std::uint8_t *out) {
+        std::uint8_t ctr_block[16];
+        std::memcpy(ctr_block, iv, 16);
+        for (int i = 0; i < 8; ++i) {
+            ctr_block[15 - i] ^= static_cast<std::uint8_t>((counter >> (8 * i)) & 0xFF);
+        }
+        size_t outlen = 0;
+        CCCryptorStatus st = CCCrypt(kCCEncrypt,
+                                     kCCAlgorithmAES128,
+                                     kCCOptionECBMode,
+                                     master_key_.data(),
+                                     master_key_.size(),
+                                     nullptr,
+                                     ctr_block,
+                                     sizeof(ctr_block),
+                                     out,
+                                     16,
+                                     &outlen);
+        if (st != kCCSuccess || outlen != 16) {
+            throw std::runtime_error("AES-CTR encryption failed");
         }
     };
 
-    fill_seed(left);
-    fill_seed(right);
+    std::uint8_t stream[32];
+    encrypt_block(0, stream);
+    encrypt_block(1, stream + 16);
+
+    std::memcpy(left.data(), stream, left.size());
+    std::memcpy(right.data(), stream + left.size(), right.size());
 }
 
 } // namespace pdpf::prg

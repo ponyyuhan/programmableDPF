@@ -7,6 +7,7 @@
 #include "pdpf/core/types.hpp"
 #include "pdpf/ldc/reed_muller_ldc.hpp"
 #include "pdpf/pdpf/pdpf_binary.hpp"
+#include "pdpf/pdpf/pdpf_group.hpp"
 #include "pdpf/prg/prg.hpp"
 #include <memory>
 #include <vector>
@@ -31,7 +32,7 @@ struct AmplifiedOfflineKey {
  *  - Contains q inner OnlineKey's for base PDPF over domain L.
  */
 struct AmplifiedOnlineKey {
-    std::vector<OnlineKey> inner_keys; ///< length q
+    std::vector<PdpfGroupOnlineKey> inner_keys; ///< length q
     core::SecurityParams   sec{};
     ldc::LdcParams         ldc_params{};
     std::uint64_t          prime_p = 0;
@@ -89,7 +90,7 @@ public:
 
 private:
     std::shared_ptr<prg::IPrg> prg_;
-    PdpfBinary                 base_pdpf_;   ///< base PDPF over Z_p on domain L
+    PdpfGroup                  group_pdpf_;   ///< base PDPF over Z_p on domain L
     ldc::ReedMullerLdc         ldc_;
     std::uint64_t              prime_p_;
 

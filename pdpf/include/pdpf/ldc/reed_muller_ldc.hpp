@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "pdpf/core/types.hpp"
 #include <cstdint>
 #include <vector>
 

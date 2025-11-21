@@ -955,4 +955,5 @@ CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.o: \
   /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_binary.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/group.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/prg/prg.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pprf/pprf.hpp
+  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pprf/pprf.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_group.hpp

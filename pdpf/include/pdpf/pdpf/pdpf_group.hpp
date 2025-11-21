@@ -51,7 +51,7 @@ public:
      */
     PdpfGroupOfflineKey gen_offline(const core::SecurityParams &sec,
                                     const core::GroupDescriptor &group,
-                                    std::size_t payload_bits);
+                                    std::size_t payload_bits) const;
 
     /**
      * Encode payload β ∈ G into payload_bits binary components.

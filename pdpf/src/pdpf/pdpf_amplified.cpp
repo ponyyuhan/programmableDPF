@@ -11,7 +11,7 @@ PdpfAmplified::PdpfAmplified(std::shared_ptr<prg::IPrg> prg,
                              const ldc::LdcParams &ldc_params,
                              std::uint64_t prime_p)
     : prg_(std::move(prg))
-    , base_pdpf_(prg_)
+    , group_pdpf_(prg_)
     , ldc_(ldc_params)
     , prime_p_(prime_p) {
     if (prime_p_ == 0) {
@@ -76,17 +76,23 @@ AmplifiedOnlineKey PdpfAmplified::gen_online(const AmplifiedOfflineKey &k0,
     // 2. For each ℓ = 1..q:
     //    - derive k*_ℓ from master_seed
     //    - form OfflineKey for base PDPF over domain L (here domain size is L)
-    //    - run base_pdpf_.gen_online for target index Δ_ℓ.
+    //    - run base PDPF (over Z_p) for target index Δ_ℓ.
     core::SecurityParams inner_sec = k0.sec;
     inner_sec.domain_size_N = L;
 
+    core::GroupDescriptor group{{prime_p_}};
+    std::size_t payload_bits = 0; // infer from descriptor
+
     for (std::uint64_t i = 0; i < q; ++i) {
         core::Seed inner_seed = derive_inner_seed(k0.master_seed, i);
-        OfflineKey inner_off = base_pdpf_.gen_offline(inner_sec);
-        inner_off.k_star = inner_seed; // override seed for determinism
+        // Deterministic offline key for group PDPF over Z_p
+        PdpfGroupOfflineKey inner_off = group_pdpf_.gen_offline(inner_sec, group, payload_bits);
+        for (std::size_t b = 0; b < inner_off.bit_offline_keys.size(); ++b) {
+            inner_off.bit_offline_keys[b].k_star = derive_inner_seed(inner_seed, b);
+        }
 
-        // Binary payload β=1 at index Δ_i (see Figure 2). :contentReference[oaicite:23]{index=23}
-        OnlineKey inner_on = base_pdpf_.gen_online(inner_off, Delta[i], 1);
+        core::GroupElement beta = {1 % static_cast<std::int64_t>(prime_p_)};
+        PdpfGroupOnlineKey inner_on = group_pdpf_.gen_online(inner_off, Delta[i], beta);
         k1.inner_keys.push_back(std::move(inner_on));
     }
 
@@ -113,15 +119,18 @@ std::int64_t PdpfAmplified::eval_offline(const AmplifiedOfflineKey &k0,
     std::int64_t acc = 0;
     for (std::uint64_t i = 0; i < q; ++i) {
         core::Seed inner_seed = derive_inner_seed(k0.master_seed, i);
-        OfflineKey inner_off = base_pdpf_.gen_offline(inner_sec);
-        inner_off.k_star = inner_seed;
+        core::GroupDescriptor group{{prime_p_}};
+        PdpfGroupOfflineKey inner_off = group_pdpf_.gen_offline(inner_sec, group, 0);
+        for (std::size_t b = 0; b < inner_off.bit_offline_keys.size(); ++b) {
+            inner_off.bit_offline_keys[b].k_star = derive_inner_seed(inner_seed, b);
+        }
 
-        std::vector<core::GroupZ::Value> Y0;
-        base_pdpf_.eval_all_offline(inner_off, Y0);
+        std::vector<core::GroupElement> Y0;
+        group_pdpf_.eval_all_offline(inner_off, Y0);
 
         std::uint64_t delta_i = (i < k1.deltas.size()) ? k1.deltas[i] % L : 0;
         if (delta_i < C_ex.size() && delta_i < Y0.size()) {
-            acc = mod_p(acc + C_ex[delta_i] * Y0[delta_i]);
+            acc = mod_p(acc + C_ex[delta_i] * Y0[delta_i][0]);
         }
     }
     return mod_p(acc);
@@ -142,12 +151,12 @@ std::int64_t PdpfAmplified::eval_online(const AmplifiedOfflineKey &k0,
 
     std::int64_t acc = 0;
     for (std::uint64_t i = 0; i < q && i < k1.inner_keys.size(); ++i) {
-        std::vector<core::GroupZ::Value> Y1;
-        base_pdpf_.eval_all_online(k1.inner_keys[i], Y1);
+        std::vector<core::GroupElement> Y1;
+        group_pdpf_.eval_all_online(k1.inner_keys[i], Y1);
 
         std::uint64_t delta_i = (i < k1.deltas.size()) ? k1.deltas[i] % L : 0;
         if (delta_i < C_ex.size() && delta_i < Y1.size()) {
-            acc = mod_p(acc + C_ex[delta_i] * Y1[delta_i]);
+            acc = mod_p(acc + C_ex[delta_i] * Y1[delta_i][0]);
         }
     }
     return mod_p(acc);

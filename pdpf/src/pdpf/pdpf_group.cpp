@@ -11,27 +11,43 @@ PdpfGroup::PdpfGroup(std::shared_ptr<prg::IPrg> prg)
     : prg_(std::move(prg)),
       base_pdpf_(prg_) {}
 
-std::size_t PdpfGroup::infer_payload_bits(const core::GroupDescriptor &group) const {
+namespace {
+
+struct BitPosition {
+    std::size_t component;
+    std::size_t bit_index;
+};
+
+static std::vector<BitPosition> build_bit_layout(const core::GroupDescriptor &group) {
     if (group.moduli.empty()) {
-        // G = Z, choose some upper bound externally.
-        throw std::runtime_error("PdpfGroup::infer_payload_bits: ambiguous for Z");
+        throw std::runtime_error("group descriptor is empty");
     }
-    std::size_t bits = 0;
-    for (auto q : group.moduli) {
+    std::vector<BitPosition> layout;
+    for (std::size_t i = 0; i < group.moduli.size(); ++i) {
+        auto q = group.moduli[i];
         if (q == 0) {
-            throw std::runtime_error("PdpfGroup::infer_payload_bits: infinite component present");
+            throw std::runtime_error("infinite group component not supported");
         }
-        std::size_t b = 0;
+        std::size_t bits = 0;
         std::uint64_t x = q - 1;
-        while (x > 0) { x >>= 1; ++b; }
-        bits += b;
+        while (x > 0) { x >>= 1; ++bits; }
+        for (std::size_t b = 0; b < bits; ++b) {
+            layout.push_back(BitPosition{i, b});
+        }
     }
-    return bits;
+    return layout;
+}
+
+} // namespace
+
+std::size_t PdpfGroup::infer_payload_bits(const core::GroupDescriptor &group) const {
+    auto layout = build_bit_layout(group);
+    return layout.size();
 }
 
 PdpfGroupOfflineKey PdpfGroup::gen_offline(const core::SecurityParams &sec,
                                            const core::GroupDescriptor &group,
-                                           std::size_t payload_bits) {
+                                           std::size_t payload_bits) const {
     PdpfGroupOfflineKey k0;
     k0.group_desc = group;
     k0.sec        = sec;
@@ -51,22 +67,23 @@ PdpfGroupOfflineKey PdpfGroup::gen_offline(const core::SecurityParams &sec,
 std::vector<std::uint8_t> PdpfGroup::encode_payload(const core::GroupDescriptor &group,
                                                     const core::GroupElement &beta,
                                                     std::size_t payload_bits) const {
-    if (payload_bits == 0) {
-        throw std::invalid_argument("encode_payload: payload_bits = 0");
+    auto layout = build_bit_layout(group);
+    if (payload_bits == 0) payload_bits = layout.size();
+    if (layout.size() != payload_bits) {
+        throw std::runtime_error("encode_payload: payload_bits mismatch");
     }
-    if (group.arity() == 0 || beta.size() == 0) {
-        throw std::invalid_argument("encode_payload: empty group or payload");
-    }
-    std::uint64_t modulus = group.moduli.empty() ? 0 : group.moduli[0];
-    std::int64_t value = beta[0];
-    if (modulus > 0) {
-        value %= static_cast<std::int64_t>(modulus);
-        if (value < 0) value += static_cast<std::int64_t>(modulus);
+    if (beta.size() != group.arity()) {
+        throw std::invalid_argument("encode_payload: beta size mismatch");
     }
 
     std::vector<std::uint8_t> bits(payload_bits, 0);
-    for (std::size_t i = 0; i < payload_bits; ++i) {
-        bits[i] = static_cast<std::uint8_t>((value >> i) & 0x1);
+    for (std::size_t k = 0; k < payload_bits; ++k) {
+        auto pos = layout[k];
+        std::uint64_t q = group.moduli[pos.component];
+        std::int64_t v = beta[pos.component];
+        v %= static_cast<std::int64_t>(q);
+        if (v < 0) v += static_cast<std::int64_t>(q);
+        bits[k] = static_cast<std::uint8_t>((static_cast<std::uint64_t>(v) >> pos.bit_index) & 1ULL);
     }
     return bits;
 }
@@ -74,25 +91,28 @@ std::vector<std::uint8_t> PdpfGroup::encode_payload(const core::GroupDescriptor 
 core::GroupElement PdpfGroup::decode_payload(const core::GroupDescriptor &group,
                                              const std::vector<std::int64_t> &bit_values,
                                              std::size_t payload_bits) const {
-    if (payload_bits == 0) {
-        throw std::invalid_argument("decode_payload: payload_bits = 0");
-    }
-    std::int64_t value = 0;
-    for (std::size_t i = 0; i < payload_bits && i < bit_values.size() && i < 63; ++i) {
-        // bit_values can be negative for online share; propagate sign.
-        value += bit_values[i] * static_cast<std::int64_t>(1ULL << i);
+    auto layout = build_bit_layout(group);
+    if (payload_bits == 0) payload_bits = layout.size();
+    if (layout.size() != payload_bits || bit_values.size() != payload_bits) {
+        throw std::runtime_error("decode_payload: payload_bits mismatch");
     }
 
     core::GroupElement out = core::group_zero(group);
-    if (!group.moduli.empty() && group.moduli[0] > 0) {
-        std::int64_t mod = static_cast<std::int64_t>(group.moduli[0]);
-        value %= mod;
-        if (value < 0) value += mod;
-    }
-    if (out.empty()) {
-        out.push_back(value);
-    } else {
-        out[0] = value;
+    out.resize(group.arity(), 0);
+
+    for (std::size_t k = 0; k < payload_bits; ++k) {
+        auto pos = layout[k];
+        std::int64_t contrib = bit_values[k] * (static_cast<std::int64_t>(1ULL << pos.bit_index));
+        auto q = group.moduli[pos.component];
+        if (q == 0) {
+            out[pos.component] += contrib;
+        } else {
+            std::int64_t mod = static_cast<std::int64_t>(q);
+            std::int64_t v = out[pos.component] + contrib;
+            v %= mod;
+            if (v < 0) v += mod;
+            out[pos.component] = v;
+        }
     }
     return out;
 }
