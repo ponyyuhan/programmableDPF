@@ -158,6 +158,43 @@ pdpf_tests/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_tests.dir/build.make CMakeFiles/pdpf_tests.dir/build
 .PHONY : pdpf_tests/fast
 
+#=============================================================================
+# Target rules for targets named composite_fss_tests
+
+# Build rule for target.
+composite_fss_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 composite_fss_tests
+.PHONY : composite_fss_tests
+
+# fast build rule for target.
+composite_fss_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/build
+.PHONY : composite_fss_tests/fast
+
+composite_fss/tests/test_composite_fss.o: composite_fss/tests/test_composite_fss.cpp.o
+.PHONY : composite_fss/tests/test_composite_fss.o
+
+# target to build an object file
+composite_fss/tests/test_composite_fss.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o
+.PHONY : composite_fss/tests/test_composite_fss.cpp.o
+
+composite_fss/tests/test_composite_fss.i: composite_fss/tests/test_composite_fss.cpp.i
+.PHONY : composite_fss/tests/test_composite_fss.i
+
+# target to preprocess a source file
+composite_fss/tests/test_composite_fss.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.i
+.PHONY : composite_fss/tests/test_composite_fss.cpp.i
+
+composite_fss/tests/test_composite_fss.s: composite_fss/tests/test_composite_fss.cpp.s
+.PHONY : composite_fss/tests/test_composite_fss.s
+
+# target to generate assembly for a file
+composite_fss/tests/test_composite_fss.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.s
+.PHONY : composite_fss/tests/test_composite_fss.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -406,9 +443,13 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... composite_fss_tests"
 	@echo "... pdpf"
 	@echo "... pdpf_demo"
 	@echo "... pdpf_tests"
+	@echo "... composite_fss/tests/test_composite_fss.o"
+	@echo "... composite_fss/tests/test_composite_fss.i"
+	@echo "... composite_fss/tests/test_composite_fss.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -43,3 +43,8 @@ target_link_libraries(pdpf_demo PRIVATE pdpf)
 
 add_executable(pdpf_tests pdpf/tests/test_pdpf.cpp)
 target_link_libraries(pdpf_tests PRIVATE pdpf)
+
+# Composite-FSS header-only demo/tests
+add_executable(composite_fss_tests composite_fss/tests/test_composite_fss.cpp)
+target_include_directories(composite_fss_tests PRIVATE composite_fss/include pdpf/include)
+target_link_libraries(composite_fss_tests PRIVATE pdpf)
