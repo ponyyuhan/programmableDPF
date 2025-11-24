@@ -11,6 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_binary.cpp.o.d"
   "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_group.cpp.o"
   "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_group.cpp.o.d"
+  "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o"
+  "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o.d"
   "CMakeFiles/pdpf.dir/pdpf/src/pprf/pprf.cpp.o"
   "CMakeFiles/pdpf.dir/pdpf/src/pprf/pprf.cpp.o.d"
   "CMakeFiles/pdpf.dir/pdpf/src/prg/prg.cpp.o"

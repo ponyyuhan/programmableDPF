@@ -185,4 +185,32 @@ void PdpfGroup::eval_all_online(const PdpfGroupOnlineKey &k1,
     }
 }
 
+core::GroupElement PdpfGroup::eval_point_offline(const PdpfGroupOfflineKey &k0,
+                                                 std::uint64_t x) const {
+    const std::size_t payload_bits = k0.bit_offline_keys.size();
+    std::vector<std::int64_t> bit_vals(payload_bits, 0);
+    for (std::size_t i = 0; i < payload_bits; ++i) {
+        std::vector<core::GroupZ::Value> Ybit;
+        base_pdpf_.eval_all_offline(k0.bit_offline_keys[i], Ybit);
+        if (x < Ybit.size()) {
+            bit_vals[i] = Ybit[static_cast<std::size_t>(x)];
+        }
+    }
+    return decode_payload(k0.group_desc, bit_vals, payload_bits);
+}
+
+core::GroupElement PdpfGroup::eval_point_online(const PdpfGroupOnlineKey &k1,
+                                                std::uint64_t x) const {
+    const std::size_t payload_bits = k1.bit_online_keys.size();
+    std::vector<std::int64_t> bit_vals(payload_bits, 0);
+    for (std::size_t i = 0; i < payload_bits; ++i) {
+        std::vector<core::GroupZ::Value> Ybit;
+        base_pdpf_.eval_all_online(k1.bit_online_keys[i], Ybit);
+        if (x < Ybit.size()) {
+            bit_vals[i] = Ybit[static_cast<std::size_t>(x)];
+        }
+    }
+    return decode_payload(k1.group_desc, bit_vals, payload_bits);
+}
+
 } // namespace pdpf::pdpf

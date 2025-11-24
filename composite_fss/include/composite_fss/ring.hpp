@@ -5,6 +5,11 @@
 
 namespace cfss {
 
+#ifndef COMPOSITE_FSS_INTERNAL
+// Default to strict: no internal/raw access unless explicitly enabled.
+#define COMPOSITE_FSS_INTERNAL 0
+#endif
+
 using u64 = std::uint64_t;
 
 // Simple ring Z_{2^n} for n <= 64 backed by uint64_t with a bitmask.
@@ -50,13 +55,35 @@ struct Ring64 {
     }
 };
 
-struct Share {
-    int party; // 0 or 1
-    u64 v;
-};
+struct RingConfig;
 
-inline Share make_share(int party, u64 v) {
-    return Share{party, v};
-}
+struct Share {
+private:
+    int party_;
+    u64 v_;
+
+public:
+    Share() : party_(-1), v_(0) {}
+    Share(int party, u64 v) : party_(party), v_(v) {}
+
+    int party() const { return party_; }
+
+#if COMPOSITE_FSS_INTERNAL
+    // Strictly internal/debug; do not use in protocol logic.
+    u64 raw_value_unsafe() const { return v_; }
+    u64 value_internal() const { return v_; }
+#else
+    // Deleted in strict builds; any accidental raw access will fail to compile.
+    u64 raw_value_unsafe() const = delete;
+    u64 value_internal() const = delete;
+#endif
+
+    friend struct RingConfig;
+    friend Share add(const struct RingConfig &, const Share &, const Share &);
+    friend Share sub(const struct RingConfig &, const Share &, const Share &);
+    friend Share negate(const struct RingConfig &, const Share &);
+    friend Share add_const(const struct RingConfig &, const Share &, u64);
+    friend Share mul_const(const struct RingConfig &, const Share &, u64);
+};
 
 } // namespace cfss

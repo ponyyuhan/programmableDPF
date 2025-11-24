@@ -1,13 +1,14 @@
 #pragma once
 
 #include "gez.hpp"
+#include "../suf.hpp"
 
 namespace cfss {
 
 struct ReLUKey {
     u64 r_in;
     u64 r_out;
-    PdpfKey lut_key; // x_hat -> ReLU(x) + r_out
+    SufCompiled compiled;
 };
 
 struct ReLUKeyPair {
@@ -25,20 +26,20 @@ inline ReLUKeyPair relu_gen(unsigned n_bits,
     u64 r_out = dealer_ctx.rng() & ring.modulus_mask;
 
     std::size_t size = 1ULL << n_bits;
-    LUTDesc desc;
-    desc.input_bits = n_bits;
-    desc.output_bits = n_bits;
-    desc.table.resize(size);
-    for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
-        u64 x = ring.sub(static_cast<u64>(x_hat), r_in);
-        std::int64_t relu = std::max<std::int64_t>(ring.to_signed(x), 0);
-        desc.table[x_hat] = ring.add(ring.from_signed(relu), r_out);
+    std::vector<std::uint64_t> table(size);
+    for (std::size_t x = 0; x < size; ++x) {
+        std::int64_t xs = ring.to_signed(static_cast<u64>(x));
+        std::int64_t relu = std::max<std::int64_t>(xs, 0);
+        table[x] = ring.from_signed(relu);
     }
-    auto [k0, k1] = engine.progGen(desc);
+    auto suf = table_to_suf(n_bits, 1, table);
+    suf.r_in = r_in;
+    suf.r_out = r_out;
+    auto compiled = compile_suf_to_pdpf(suf, engine);
 
     ReLUKeyPair pair;
-    pair.k0 = ReLUKey{r_in, r_out, k0};
-    pair.k1 = ReLUKey{r_in, r_out, k1};
+    pair.k0 = ReLUKey{r_in, r_out, compiled};
+    pair.k1 = ReLUKey{r_in, r_out, compiled};
     return pair;
 }
 
@@ -48,8 +49,9 @@ inline Share relu_eval(int party,
                        PdpfEngine &engine,
                        MPCContext &ctx) {
     (void)ctx;
-    auto out = engine.eval(party, key.lut_key, x_hat);
-    return Share{party, out.empty() ? 0 : out[0]};
+    std::vector<std::uint64_t> out(key.compiled.output_words);
+    engine.eval_share(key.compiled.pdpf_program, party, x_hat, out);
+    return Share{party, out[0]};
 }
 
 } // namespace cfss

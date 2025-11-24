@@ -52,4 +52,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/pdpf_demo.dir/DependInfo.cmake"
   "CMakeFiles/pdpf_tests.dir/DependInfo.cmake"
   "CMakeFiles/composite_fss_tests.dir/DependInfo.cmake"
+  "CMakeFiles/composite_fss_test_suf_packing.dir/DependInfo.cmake"
+  "CMakeFiles/composite_fss_no_raw_open.dir/DependInfo.cmake"
+  "CMakeFiles/bench_composite_fss.dir/DependInfo.cmake"
   )

@@ -89,6 +89,13 @@ public:
     void eval_all_online(const PdpfGroupOnlineKey &k1,
                          std::vector<core::GroupElement> &Y) const;
 
+    // Convenience point evaluations (used by composite_fss PdpfEngineFull).
+    core::GroupElement eval_point_offline(const PdpfGroupOfflineKey &k0,
+                                          std::uint64_t x) const;
+
+    core::GroupElement eval_point_online(const PdpfGroupOnlineKey &k1,
+                                         std::uint64_t x) const;
+
 private:
     std::shared_ptr<prg::IPrg> prg_;
     PdpfBinary                 base_pdpf_; // reused for all bits

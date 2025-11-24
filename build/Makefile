@@ -171,6 +171,69 @@ composite_fss_tests/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/build
 .PHONY : composite_fss_tests/fast
 
+#=============================================================================
+# Target rules for targets named composite_fss_test_suf_packing
+
+# Build rule for target.
+composite_fss_test_suf_packing: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 composite_fss_test_suf_packing
+.PHONY : composite_fss_test_suf_packing
+
+# fast build rule for target.
+composite_fss_test_suf_packing/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/build
+.PHONY : composite_fss_test_suf_packing/fast
+
+#=============================================================================
+# Target rules for targets named composite_fss_no_raw_open
+
+# Build rule for target.
+composite_fss_no_raw_open: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 composite_fss_no_raw_open
+.PHONY : composite_fss_no_raw_open
+
+# fast build rule for target.
+composite_fss_no_raw_open/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/build
+.PHONY : composite_fss_no_raw_open/fast
+
+#=============================================================================
+# Target rules for targets named bench_composite_fss
+
+# Build rule for target.
+bench_composite_fss: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 bench_composite_fss
+.PHONY : bench_composite_fss
+
+# fast build rule for target.
+bench_composite_fss/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/build
+.PHONY : bench_composite_fss/fast
+
+composite_fss/bench/bench_composite_fss.o: composite_fss/bench/bench_composite_fss.cpp.o
+.PHONY : composite_fss/bench/bench_composite_fss.o
+
+# target to build an object file
+composite_fss/bench/bench_composite_fss.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/composite_fss/bench/bench_composite_fss.cpp.o
+.PHONY : composite_fss/bench/bench_composite_fss.cpp.o
+
+composite_fss/bench/bench_composite_fss.i: composite_fss/bench/bench_composite_fss.cpp.i
+.PHONY : composite_fss/bench/bench_composite_fss.i
+
+# target to preprocess a source file
+composite_fss/bench/bench_composite_fss.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/composite_fss/bench/bench_composite_fss.cpp.i
+.PHONY : composite_fss/bench/bench_composite_fss.cpp.i
+
+composite_fss/bench/bench_composite_fss.s: composite_fss/bench/bench_composite_fss.cpp.s
+.PHONY : composite_fss/bench/bench_composite_fss.s
+
+# target to generate assembly for a file
+composite_fss/bench/bench_composite_fss.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/composite_fss/bench/bench_composite_fss.cpp.s
+.PHONY : composite_fss/bench/bench_composite_fss.cpp.s
+
 composite_fss/tests/test_composite_fss.o: composite_fss/tests/test_composite_fss.cpp.o
 .PHONY : composite_fss/tests/test_composite_fss.o
 
@@ -194,6 +257,54 @@ composite_fss/tests/test_composite_fss.s: composite_fss/tests/test_composite_fss
 composite_fss/tests/test_composite_fss.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.s
 .PHONY : composite_fss/tests/test_composite_fss.cpp.s
+
+composite_fss/tests/test_no_raw_open.o: composite_fss/tests/test_no_raw_open.cpp.o
+.PHONY : composite_fss/tests/test_no_raw_open.o
+
+# target to build an object file
+composite_fss/tests/test_no_raw_open.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/composite_fss/tests/test_no_raw_open.cpp.o
+.PHONY : composite_fss/tests/test_no_raw_open.cpp.o
+
+composite_fss/tests/test_no_raw_open.i: composite_fss/tests/test_no_raw_open.cpp.i
+.PHONY : composite_fss/tests/test_no_raw_open.i
+
+# target to preprocess a source file
+composite_fss/tests/test_no_raw_open.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/composite_fss/tests/test_no_raw_open.cpp.i
+.PHONY : composite_fss/tests/test_no_raw_open.cpp.i
+
+composite_fss/tests/test_no_raw_open.s: composite_fss/tests/test_no_raw_open.cpp.s
+.PHONY : composite_fss/tests/test_no_raw_open.s
+
+# target to generate assembly for a file
+composite_fss/tests/test_no_raw_open.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/composite_fss/tests/test_no_raw_open.cpp.s
+.PHONY : composite_fss/tests/test_no_raw_open.cpp.s
+
+composite_fss/tests/test_suf_packing.o: composite_fss/tests/test_suf_packing.cpp.o
+.PHONY : composite_fss/tests/test_suf_packing.o
+
+# target to build an object file
+composite_fss/tests/test_suf_packing.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/composite_fss/tests/test_suf_packing.cpp.o
+.PHONY : composite_fss/tests/test_suf_packing.cpp.o
+
+composite_fss/tests/test_suf_packing.i: composite_fss/tests/test_suf_packing.cpp.i
+.PHONY : composite_fss/tests/test_suf_packing.i
+
+# target to preprocess a source file
+composite_fss/tests/test_suf_packing.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/composite_fss/tests/test_suf_packing.cpp.i
+.PHONY : composite_fss/tests/test_suf_packing.cpp.i
+
+composite_fss/tests/test_suf_packing.s: composite_fss/tests/test_suf_packing.cpp.s
+.PHONY : composite_fss/tests/test_suf_packing.s
+
+# target to generate assembly for a file
+composite_fss/tests/test_suf_packing.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/composite_fss/tests/test_suf_packing.cpp.s
+.PHONY : composite_fss/tests/test_suf_packing.cpp.s
 
 main.o: main.cpp.o
 .PHONY : main.o
@@ -363,6 +474,30 @@ pdpf/src/pdpf/pdpf_group.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_group.cpp.s
 .PHONY : pdpf/src/pdpf/pdpf_group.cpp.s
 
+pdpf/src/pdpf/pdpf_lut.o: pdpf/src/pdpf/pdpf_lut.cpp.o
+.PHONY : pdpf/src/pdpf/pdpf_lut.o
+
+# target to build an object file
+pdpf/src/pdpf/pdpf_lut.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o
+.PHONY : pdpf/src/pdpf/pdpf_lut.cpp.o
+
+pdpf/src/pdpf/pdpf_lut.i: pdpf/src/pdpf/pdpf_lut.cpp.i
+.PHONY : pdpf/src/pdpf/pdpf_lut.i
+
+# target to preprocess a source file
+pdpf/src/pdpf/pdpf_lut.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.i
+.PHONY : pdpf/src/pdpf/pdpf_lut.cpp.i
+
+pdpf/src/pdpf/pdpf_lut.s: pdpf/src/pdpf/pdpf_lut.cpp.s
+.PHONY : pdpf/src/pdpf/pdpf_lut.s
+
+# target to generate assembly for a file
+pdpf/src/pdpf/pdpf_lut.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.s
+.PHONY : pdpf/src/pdpf/pdpf_lut.cpp.s
+
 pdpf/src/pprf/pprf.o: pdpf/src/pprf/pprf.cpp.o
 .PHONY : pdpf/src/pprf/pprf.o
 
@@ -443,13 +578,25 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... bench_composite_fss"
+	@echo "... composite_fss_no_raw_open"
+	@echo "... composite_fss_test_suf_packing"
 	@echo "... composite_fss_tests"
 	@echo "... pdpf"
 	@echo "... pdpf_demo"
 	@echo "... pdpf_tests"
+	@echo "... composite_fss/bench/bench_composite_fss.o"
+	@echo "... composite_fss/bench/bench_composite_fss.i"
+	@echo "... composite_fss/bench/bench_composite_fss.s"
 	@echo "... composite_fss/tests/test_composite_fss.o"
 	@echo "... composite_fss/tests/test_composite_fss.i"
 	@echo "... composite_fss/tests/test_composite_fss.s"
+	@echo "... composite_fss/tests/test_no_raw_open.o"
+	@echo "... composite_fss/tests/test_no_raw_open.i"
+	@echo "... composite_fss/tests/test_no_raw_open.s"
+	@echo "... composite_fss/tests/test_suf_packing.o"
+	@echo "... composite_fss/tests/test_suf_packing.i"
+	@echo "... composite_fss/tests/test_suf_packing.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
@@ -471,6 +618,9 @@ help:
 	@echo "... pdpf/src/pdpf/pdpf_group.o"
 	@echo "... pdpf/src/pdpf/pdpf_group.i"
 	@echo "... pdpf/src/pdpf/pdpf_group.s"
+	@echo "... pdpf/src/pdpf/pdpf_lut.o"
+	@echo "... pdpf/src/pdpf/pdpf_lut.i"
+	@echo "... pdpf/src/pdpf/pdpf_lut.s"
 	@echo "... pdpf/src/pprf/pprf.o"
 	@echo "... pdpf/src/pprf/pprf.i"
 	@echo "... pdpf/src/pprf/pprf.s"

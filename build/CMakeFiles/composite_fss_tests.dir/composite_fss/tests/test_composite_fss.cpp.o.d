@@ -90,6 +90,7 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_assert.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_static_assert.h \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/sharing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/arith.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/random \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__random/bernoulli_distribution.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__random/is_valid.h \
@@ -957,27 +958,32 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__random/weibull_distribution.h \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/pdpf_adapter.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/pdpf.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_group.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/types.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/group.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_binary.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/prg/prg.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pprf/pprf.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/gez.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../pdpf.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../sharing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../arith.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/relu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/trunc.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_packing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_unpack.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_to_lut.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_eval.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/gelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../arith.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../ring.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../beaver.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../wire.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/nexp.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../pdpf_adapter.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/inv.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/drelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/recsqrt.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/wire.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_eval.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_to_lut.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_packing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_unpack.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/istream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__ostream/basic_ostream.h \

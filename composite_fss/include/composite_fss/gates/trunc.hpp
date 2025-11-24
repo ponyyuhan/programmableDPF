@@ -2,6 +2,10 @@
 
 #include "../pdpf.hpp"
 #include "../sharing.hpp"
+#include "../suf.hpp"
+#include "../suf_packing.hpp"
+#include "../suf_unpack.hpp"
+#include "../suf_to_lut.hpp"
 #include "relu.hpp"
 #include <optional>
 
@@ -11,7 +15,7 @@ struct LRSKey {
     unsigned f;
     u64 r_in;
     u64 r_out_tilde;
-    PdpfKey lut_key; // x_hat -> (x>>f) + r_out_tilde (logical)
+    SufCompiled compiled; // x_hat -> (x>>f) + r_out_tilde (logical)
 };
 
 struct LRSKeyPair {
@@ -27,20 +31,20 @@ inline LRSKeyPair lrs_gen(unsigned n_bits,
     u64 r_in = dealer_ctx.rng() & ring.modulus_mask;
     u64 r_out_tilde = dealer_ctx.rng() & ring.modulus_mask;
     std::size_t size = 1ULL << n_bits;
-    LUTDesc desc;
-    desc.input_bits = n_bits;
-    desc.output_bits = n_bits;
-    desc.table.resize(size);
+    std::vector<std::uint64_t> table(size);
     for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
-        u64 x = ring.sub(static_cast<u64>(x_hat), r_in);
+        u64 x = static_cast<u64>(x_hat);
         u64 y = (x >> f) & ring.modulus_mask;
-        desc.table[x_hat] = ring.add(y, r_out_tilde);
+        table[x_hat] = y;
     }
-    auto [k0, k1] = engine.progGen(desc);
+    auto suf = table_to_suf(n_bits, 1, table);
+    suf.r_in = r_in;
+    suf.r_out = r_out_tilde;
+    auto compiled = compile_suf_to_pdpf(suf, engine);
 
     LRSKeyPair pair;
-    pair.k0 = LRSKey{f, r_in, r_out_tilde, k0};
-    pair.k1 = LRSKey{f, r_in, r_out_tilde, k1};
+    pair.k0 = LRSKey{f, r_in, r_out_tilde, compiled};
+    pair.k1 = LRSKey{f, r_in, r_out_tilde, compiled};
     return pair;
 }
 
@@ -49,8 +53,9 @@ inline Share lrs_eval(int party,
                       u64 x_hat,
                       PdpfEngine &engine,
                       MPCContext & /*ctx*/) {
-    auto out = engine.eval(party, key.lut_key, x_hat);
-    return Share{party, out.empty() ? 0 : out[0]};
+    std::vector<std::uint64_t> out(1);
+    engine.eval_share(key.compiled.pdpf_program, party, x_hat, out);
+    return Share{party, out[0]};
 }
 
 struct ARSKey {
@@ -58,7 +63,10 @@ struct ARSKey {
     unsigned f;
     u64 r_in;
     u64 r_out_tilde;
-    PdpfKey lut_key; // x_hat -> (x >>_arith f) + r_out_tilde
+    SufCompiled compiled; // packed: [ (x >>_arith f)+r_out_tilde , sign_bit ]
+    SufPackedLayout layout;
+    SufChannelId val_channel;
+    SufChannelId sign_channel;
 };
 
 struct ARSKeyPair {
@@ -74,20 +82,34 @@ inline ARSKeyPair ars_gen(unsigned n_bits,
     u64 r_in = dealer_ctx.rng() & ring.modulus_mask;
     u64 r_out_tilde = dealer_ctx.rng() & ring.modulus_mask;
     std::size_t size = 1ULL << n_bits;
-    LUTDesc desc;
-    desc.input_bits = n_bits;
-    desc.output_bits = n_bits;
-    desc.table.resize(size);
+    std::vector<std::uint64_t> table(size);
     for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
-        u64 x = ring.sub(static_cast<u64>(x_hat), r_in);
+        u64 x = static_cast<u64>(x_hat);
         std::int64_t y = ring.to_signed(x) >> f;
-        desc.table[x_hat] = ring.add(ring.from_signed(y), r_out_tilde);
+        table[x_hat] = ring.from_signed(y);
     }
-    auto [k0, k1] = engine.progGen(desc);
+    // Build packed SUF with arithmetic output and sign bit.
+    SufDesc suf = table_to_suf(n_bits, 1, table);
+    suf.l_outputs = 1;
+    suf.shape.num_words = 2;
+    suf.shape.channels.clear();
+    SufChannelId val_ch = suf.shape.add_channel("ars_val", SufFieldKind::Ring, n_bits, 1);
+    SufChannelId sign_ch = suf.shape.add_channel("ars_sign", SufFieldKind::Bool, 1, 1);
+    SufInterval iv;
+    iv.alpha_start = 0;
+    iv.alpha_end = 1ULL << n_bits;
+    BoolExpr sign_expr;
+    sign_expr.kind = BoolExpr::MSB_SHIFT;
+    sign_expr.param = 1ULL << (n_bits - 1); // MSB is sign
+    suf.bools.clear();
+    suf.bools.push_back(std::vector<BoolExpr>{sign_expr});
+    suf.r_in = r_in;
+    suf.r_out = r_out_tilde;
+    auto packed = compile_suf_desc_packed(suf, engine, std::nullopt, n_bits);
 
     ARSKeyPair pair;
-    pair.k0 = ARSKey{n_bits, f, r_in, r_out_tilde, k0};
-    pair.k1 = ARSKey{n_bits, f, r_in, r_out_tilde, k1};
+    pair.k0 = ARSKey{n_bits, f, r_in, r_out_tilde, packed.compiled, packed.layout, val_ch, sign_ch};
+    pair.k1 = ARSKey{n_bits, f, r_in, r_out_tilde, packed.compiled, packed.layout, val_ch, sign_ch};
     return pair;
 }
 
@@ -96,14 +118,20 @@ inline Share ars_eval(int party,
                       u64 x_hat,
                       PdpfEngine &engine,
                       MPCContext & /*ctx*/) {
-    auto out = engine.eval(party, key.lut_key, x_hat);
-    return Share{party, out.empty() ? 0 : out[0]};
+    std::vector<std::uint64_t> out(2);
+    engine.eval_share(key.compiled.pdpf_program, party, x_hat, out);
+    std::vector<Share> share_words;
+    share_words.emplace_back(party, out[0]);
+    if (out.size() > 1) share_words.emplace_back(party, out[1]);
+    auto cfg = make_ring_config(key.n_bits);
+    // Extract the primary value channel.
+    return suf_unpack_channel_share(cfg, key.layout, key.val_channel, 0, share_words);
 }
 
 struct ReluARSKey {
     u64 r_in;
     u64 r_out;
-    PdpfKey lut_key; // x_hat -> ReLU(x >>_arith f) + r_out
+    SufCompiled compiled; // x_hat -> ReLU(x >>_arith f) + r_out
 };
 
 struct ReluARSKeyPair {
@@ -120,21 +148,21 @@ inline ReluARSKeyPair relu_ars_gen(unsigned n_bits,
     u64 r_in = ars_pair.k0.r_in; // same for both
     u64 r_out = dealer_ctx.rng() & ring.modulus_mask;
     std::size_t size = 1ULL << n_bits;
-    LUTDesc desc;
-    desc.input_bits = n_bits;
-    desc.output_bits = n_bits;
-    desc.table.resize(size);
+    std::vector<std::uint64_t> table(size);
     for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
-        u64 x = ring.sub(static_cast<u64>(x_hat), r_in);
+        u64 x = static_cast<u64>(x_hat);
         std::int64_t y = ring.to_signed(x) >> f;
         std::int64_t relu = std::max<std::int64_t>(y, 0);
-        desc.table[x_hat] = ring.add(ring.from_signed(relu), r_out);
+        table[x_hat] = ring.from_signed(relu);
     }
-    auto [k0, k1] = engine.progGen(desc);
+    auto suf = table_to_suf(n_bits, 1, table);
+    suf.r_in = r_in;
+    suf.r_out = r_out;
+    auto compiled = compile_suf_to_pdpf(suf, engine);
 
     ReluARSKeyPair pair;
-    pair.k0 = ReluARSKey{r_in, r_out, k0};
-    pair.k1 = ReluARSKey{r_in, r_out, k1};
+    pair.k0 = ReluARSKey{r_in, r_out, compiled};
+    pair.k1 = ReluARSKey{r_in, r_out, compiled};
     return pair;
 }
 
@@ -143,8 +171,9 @@ inline Share relu_ars_eval(int party,
                            u64 x_hat,
                            PdpfEngine &engine,
                            MPCContext & /*ctx*/) {
-    auto out = engine.eval(party, key.lut_key, x_hat);
-    return Share{party, out.empty() ? 0 : out[0]};
+    std::vector<std::uint64_t> out(1);
+    engine.eval_share(key.compiled.pdpf_program, party, x_hat, out);
+    return Share{party, out[0]};
 }
 
 } // namespace cfss

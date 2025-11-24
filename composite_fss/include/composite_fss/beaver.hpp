@@ -2,6 +2,7 @@
 
 #include "arith.hpp"
 #include <random>
+#include <utility>
 
 namespace cfss {
 
@@ -17,6 +18,10 @@ class BeaverPool {
 public:
     BeaverPool(const RingConfig &cfg, std::uint64_t seed, int party)
         : cfg_(cfg), party_(party), prng_(seed) {}
+
+    struct Counters {
+        std::size_t triples_used = 0;
+    };
 
     BeaverTriple next_triple_public() {
         std::uniform_int_distribution<std::uint64_t> dist(0, cfg_.modulus_mask);
@@ -39,10 +44,15 @@ public:
         return BeaverTriple{a1, b1, c1};
     }
 
+    const Counters &counters() const { return counters_; }
+    void reset_counters() { counters_ = Counters{}; }
+    void bump_triple() { counters_.triples_used++; }
+
 private:
     RingConfig cfg_;
     int party_;
     std::mt19937_64 prng_;
+    Counters counters_;
 };
 
 struct MulLocal {
@@ -55,8 +65,8 @@ inline MulLocal mul_prepare(const RingConfig &cfg,
                             const Share &y,
                             const BeaverTriple &triple) {
     MulLocal m;
-    m.d = ring_sub(cfg, x.v, triple.a);
-    m.e = ring_sub(cfg, y.v, triple.b);
+    m.d = ring_sub(cfg, x.value_internal(), triple.a);
+    m.e = ring_sub(cfg, y.value_internal(), triple.b);
     return m;
 }
 
@@ -80,16 +90,40 @@ inline Share mul_finish(const RingConfig &cfg,
     return Share{party, term};
 }
 
-inline Share add(const RingConfig &cfg, const Share &a, const Share &b) {
-    return Share{a.party, ring_add(cfg, a.v, b.v)};
+inline Share mul(BeaverPool &pool,
+                 const RingConfig &cfg,
+                 const Share &x,
+                 const Share &y) {
+    auto pub = pool.next_triple_public();
+    auto t_self = pool.share_triple(pub);
+    pool.bump_triple();
+    // In single-process tests, we derive the other party's share deterministically.
+    BeaverTriple t_other = {ring_sub(cfg, pub.a, t_self.a),
+                            ring_sub(cfg, pub.b, t_self.b),
+                            ring_sub(cfg, pub.c, t_self.c)};
+    MulLocal m_self = mul_prepare(cfg, x, y, t_self);
+    MulLocal m_other = mul_prepare(cfg, Share{1 - x.party(), 0}, Share{1 - y.party(), 0}, t_other);
+    auto [d_open, e_open] = mul_open(cfg, m_self, m_other);
+    return mul_finish(cfg, x.party(), t_self, d_open, e_open);
 }
 
-inline Share sub(const RingConfig &cfg, const Share &a, const Share &b) {
-    return Share{a.party, ring_sub(cfg, a.v, b.v)};
+inline Share beaver_mul(BeaverPool &pool,
+                        const RingConfig &cfg,
+                        const Share &x,
+                        const Share &y) {
+    return mul(pool, cfg, x, y);
 }
 
-inline Share negate(const RingConfig &cfg, const Share &a) {
-    return Share{a.party, ring_sub(cfg, 0, a.v)};
+inline std::vector<Share> beaver_mul_batch(BeaverPool &pool,
+                                           const RingConfig &cfg,
+                                           const std::vector<Share> &xs,
+                                           const std::vector<Share> &ys) {
+    std::vector<Share> out;
+    out.reserve(xs.size());
+    for (std::size_t i = 0; i < xs.size(); ++i) {
+        out.push_back(beaver_mul(pool, cfg, xs[i], ys[i]));
+    }
+    return out;
 }
 
 inline Share constant(const RingConfig &cfg, std::uint64_t v, int party) {

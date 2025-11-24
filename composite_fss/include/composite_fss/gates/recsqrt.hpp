@@ -3,6 +3,7 @@
 #include "../pdpf_adapter.hpp"
 #include "../arith.hpp"
 #include "../sharing.hpp"
+#include "../suf.hpp"
 #include <random>
 #include <vector>
 #include <cmath>
@@ -19,7 +20,7 @@ struct RecSqrtGateParams {
 struct RecSqrtGateKey {
     std::uint64_t r_in;
     std::uint64_t r_out;
-    PdpfKey lut_key;
+    PdpfProgramId prog;
 };
 
 struct RecSqrtGateKeyPair {
@@ -36,10 +37,7 @@ inline RecSqrtGateKeyPair gen_recsqrt_gate(const RecSqrtGateParams &params,
     std::uint64_t r_out = dist(rng);
 
     std::size_t size = 1ULL << params.domain_bits;
-    LUTDesc desc;
-    desc.input_bits = params.domain_bits;
-    desc.output_bits = params.n_bits;
-    desc.table.resize(size);
+    std::vector<std::uint64_t> table(size);
 
     double scale_out = static_cast<double>(1ULL << params.f_out);
     double scale_in = static_cast<double>(1ULL << params.f_in);
@@ -49,13 +47,14 @@ inline RecSqrtGateKeyPair gen_recsqrt_gate(const RecSqrtGateParams &params,
         double xr = static_cast<double>(x) / scale_in;
         double val = 1.0 / std::sqrt(xr);
         std::int64_t fp = static_cast<std::int64_t>(std::llround(val * scale_out));
-        desc.table[x_hat] = ring_add(cfg, static_cast<std::uint64_t>(fp), r_out);
+        table[x_hat] = ring_add(cfg, static_cast<std::uint64_t>(fp), r_out);
     }
 
-    auto [k0, k1] = engine.progGen(desc);
+    auto suf = table_to_suf(params.domain_bits, 1, table);
+    auto compiled = compile_suf_to_pdpf(suf, engine);
     RecSqrtGateKeyPair pair;
-    pair.k0 = RecSqrtGateKey{r_in, r_out, k0};
-    pair.k1 = RecSqrtGateKey{r_in, r_out, k1};
+    pair.k0 = RecSqrtGateKey{r_in, r_out, compiled.pdpf_program};
+    pair.k1 = RecSqrtGateKey{r_in, r_out, compiled.pdpf_program};
     return pair;
 }
 
@@ -63,8 +62,9 @@ inline Share recsqrt_eval(int party,
                           const RecSqrtGateKey &key,
                           std::uint64_t x_hat,
                           PdpfEngine &engine) {
-    auto out = engine.eval(party, key.lut_key, x_hat);
-    return Share{party, out.empty() ? 0 : out[0]};
+    std::vector<std::uint64_t> out(1);
+    engine.eval_share(key.prog, party, x_hat, out);
+    return Share{party, out[0]};
 }
 
 } // namespace cfss

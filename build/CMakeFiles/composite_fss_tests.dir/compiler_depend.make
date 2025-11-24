@@ -990,13 +990,20 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdarg.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/arith.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/arith.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/pdpf.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/pdpf_adapter.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/ring.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/sharing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_eval.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_packing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_to_lut.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_unpack.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/wire.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/drelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/gelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/gez.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/inv.hpp \
@@ -1009,25 +1016,28 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/pdpf_adapter.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/ring.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/sharing.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/group.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/types.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_binary.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_group.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pprf/pprf.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/prg/prg.hpp
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_eval.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_packing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_to_lut.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_unpack.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/wire.hpp
 
-
-/Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_group.hpp:
-
-/Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/types.hpp:
 
 /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/trunc.hpp:
 
 /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/softmax.hpp:
 
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/inv.hpp:
+
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/drelu.hpp:
+
 /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/nexp.hpp:
 
-/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/inv.hpp:
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_unpack.hpp:
+
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_to_lut.hpp:
+
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf.hpp:
 
 /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/pdpf_adapter.hpp:
 
@@ -1112,6 +1122,8 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_int16_t.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_ino64_t.h:
+
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_packing.hpp:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_in_port_t.h:
 
@@ -1310,8 +1322,6 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/exception_guard.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/declval.h:
-
-/Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/core/group.hpp:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__utility/convert_to_integral.h:
 
@@ -1602,8 +1612,6 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/has_virtual_destructor.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/is_constant_evaluated.h:
-
-/Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pprf/pprf.hpp:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/equal_range.h:
 
@@ -2481,8 +2489,6 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/weak_result_type.h:
 
-/Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/pdpf/pdpf_binary.hpp:
-
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/ranges_set_union.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/ranges_remove_copy_if.h:
@@ -2775,6 +2781,8 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__atomic/atomic_init.h:
 
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/wire.hpp:
+
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/in_fun_result.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__iterator/istreambuf_iterator.h:
@@ -2975,6 +2983,8 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/dependent_type.h:
 
+/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_eval.hpp:
+
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__memory/ranges_uninitialized_algorithms.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__atomic/fence.h:
@@ -3024,8 +3034,6 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uintptr_t.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/ranges_none_of.h:
-
-/Users/yuhan/Desktop/workspace/PDPF/pdpf/include/pdpf/prg/prg.hpp:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__memory/allocation_guard.h:
 

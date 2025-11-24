@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ring.hpp"
+#include "arith.hpp"
 #include <random>
 #include <utility>
 
@@ -35,19 +36,35 @@ struct MPCContext {
     }
 
     u64 reconstruct(const Share &a0, const Share &a1) const {
-        return ring.add(a0.v, a1.v);
+        unsigned bits = (ring.modulus_mask == ~0ULL)
+                            ? 64u
+                            : static_cast<unsigned>(64 - __builtin_clzll(ring.modulus_mask));
+        RingConfig cfg = make_ring_config(bits);
+        return debug_open(cfg, a0, a1);
     }
 
     Share add(const Share &a, const Share &b) const {
-        return Share{a.party, ring.add(a.v, b.v)};
+        unsigned bits = (ring.modulus_mask == ~0ULL)
+                            ? 64u
+                            : static_cast<unsigned>(64 - __builtin_clzll(ring.modulus_mask));
+        RingConfig cfg = make_ring_config(bits);
+        return cfss::add(cfg, a, b);
     }
 
     Share add_const(const Share &a, u64 c) const {
-        return Share{a.party, ring.add(a.v, c)};
+        unsigned bits = (ring.modulus_mask == ~0ULL)
+                            ? 64u
+                            : static_cast<unsigned>(64 - __builtin_clzll(ring.modulus_mask));
+        RingConfig cfg = make_ring_config(bits);
+        return cfss::add_const(cfg, a, c);
     }
 
     Share sub(const Share &a, const Share &b) const {
-        return Share{a.party, ring.sub(a.v, b.v)};
+        unsigned bits = (ring.modulus_mask == ~0ULL)
+                            ? 64u
+                            : static_cast<unsigned>(64 - __builtin_clzll(ring.modulus_mask));
+        RingConfig cfg = make_ring_config(bits);
+        return cfss::sub(cfg, a, b);
     }
 };
 

@@ -187,6 +187,20 @@ CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/yuhan/Desktop/workspace/PDPF/pdpf/src/pdpf/pdpf_amplified.cpp -o CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.s
 
+CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o: CMakeFiles/pdpf.dir/flags.make
+CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o: /Users/yuhan/Desktop/workspace/PDPF/pdpf/src/pdpf/pdpf_lut.cpp
+CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o: CMakeFiles/pdpf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o -MF CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o.d -o CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o -c /Users/yuhan/Desktop/workspace/PDPF/pdpf/src/pdpf/pdpf_lut.cpp
+
+CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/yuhan/Desktop/workspace/PDPF/pdpf/src/pdpf/pdpf_lut.cpp > CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.i
+
+CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/yuhan/Desktop/workspace/PDPF/pdpf/src/pdpf/pdpf_lut.cpp -o CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.s
+
 # Object files for target pdpf
 pdpf_OBJECTS = \
 "CMakeFiles/pdpf.dir/pdpf/src/core/types.cpp.o" \
@@ -196,7 +210,8 @@ pdpf_OBJECTS = \
 "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_binary.cpp.o" \
 "CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_group.cpp.o" \
 "CMakeFiles/pdpf.dir/pdpf/src/ldc/reed_muller_ldc.cpp.o" \
-"CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.o"
+"CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.o" \
+"CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o"
 
 # External object files for target pdpf
 pdpf_EXTERNAL_OBJECTS =
@@ -209,9 +224,10 @@ libpdpf.a: CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_binary.cpp.o
 libpdpf.a: CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_group.cpp.o
 libpdpf.a: CMakeFiles/pdpf.dir/pdpf/src/ldc/reed_muller_ldc.cpp.o
 libpdpf.a: CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_amplified.cpp.o
+libpdpf.a: CMakeFiles/pdpf.dir/pdpf/src/pdpf/pdpf_lut.cpp.o
 libpdpf.a: CMakeFiles/pdpf.dir/build.make
 libpdpf.a: CMakeFiles/pdpf.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library libpdpf.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX static library libpdpf.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/pdpf.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/pdpf.dir/link.txt --verbose=$(VERBOSE)
 

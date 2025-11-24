@@ -70,6 +70,9 @@ all: CMakeFiles/pdpf.dir/all
 all: CMakeFiles/pdpf_demo.dir/all
 all: CMakeFiles/pdpf_tests.dir/all
 all: CMakeFiles/composite_fss_tests.dir/all
+all: CMakeFiles/composite_fss_test_suf_packing.dir/all
+all: CMakeFiles/composite_fss_no_raw_open.dir/all
+all: CMakeFiles/bench_composite_fss.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
@@ -77,6 +80,9 @@ codegen: CMakeFiles/pdpf.dir/codegen
 codegen: CMakeFiles/pdpf_demo.dir/codegen
 codegen: CMakeFiles/pdpf_tests.dir/codegen
 codegen: CMakeFiles/composite_fss_tests.dir/codegen
+codegen: CMakeFiles/composite_fss_test_suf_packing.dir/codegen
+codegen: CMakeFiles/composite_fss_no_raw_open.dir/codegen
+codegen: CMakeFiles/bench_composite_fss.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -88,6 +94,9 @@ clean: CMakeFiles/pdpf.dir/clean
 clean: CMakeFiles/pdpf_demo.dir/clean
 clean: CMakeFiles/pdpf_tests.dir/clean
 clean: CMakeFiles/composite_fss_tests.dir/clean
+clean: CMakeFiles/composite_fss_test_suf_packing.dir/clean
+clean: CMakeFiles/composite_fss_no_raw_open.dir/clean
+clean: CMakeFiles/bench_composite_fss.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -97,12 +106,12 @@ clean: CMakeFiles/composite_fss_tests.dir/clean
 CMakeFiles/pdpf.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11 "Built target pdpf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18 "Built target pdpf"
 .PHONY : CMakeFiles/pdpf.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/pdpf.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/pdpf.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
 .PHONY : CMakeFiles/pdpf.dir/rule
@@ -114,7 +123,7 @@ pdpf: CMakeFiles/pdpf.dir/rule
 # codegen rule for target.
 CMakeFiles/pdpf.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf.dir/build.make CMakeFiles/pdpf.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11 "Finished codegen for target pdpf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18 "Finished codegen for target pdpf"
 .PHONY : CMakeFiles/pdpf.dir/codegen
 
 # clean rule for target.
@@ -129,12 +138,12 @@ CMakeFiles/pdpf.dir/clean:
 CMakeFiles/pdpf_demo.dir/all: CMakeFiles/pdpf.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_demo.dir/build.make CMakeFiles/pdpf_demo.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_demo.dir/build.make CMakeFiles/pdpf_demo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=12,13 "Built target pdpf_demo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=19,20 "Built target pdpf_demo"
 .PHONY : CMakeFiles/pdpf_demo.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/pdpf_demo.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 11
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 12
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/pdpf_demo.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
 .PHONY : CMakeFiles/pdpf_demo.dir/rule
@@ -146,7 +155,7 @@ pdpf_demo: CMakeFiles/pdpf_demo.dir/rule
 # codegen rule for target.
 CMakeFiles/pdpf_demo.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_demo.dir/build.make CMakeFiles/pdpf_demo.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=12,13 "Finished codegen for target pdpf_demo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=19,20 "Finished codegen for target pdpf_demo"
 .PHONY : CMakeFiles/pdpf_demo.dir/codegen
 
 # clean rule for target.
@@ -161,12 +170,12 @@ CMakeFiles/pdpf_demo.dir/clean:
 CMakeFiles/pdpf_tests.dir/all: CMakeFiles/pdpf.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_tests.dir/build.make CMakeFiles/pdpf_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_tests.dir/build.make CMakeFiles/pdpf_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=14,15 "Built target pdpf_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=21,22 "Built target pdpf_tests"
 .PHONY : CMakeFiles/pdpf_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/pdpf_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 11
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 12
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/pdpf_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
 .PHONY : CMakeFiles/pdpf_tests.dir/rule
@@ -178,7 +187,7 @@ pdpf_tests: CMakeFiles/pdpf_tests.dir/rule
 # codegen rule for target.
 CMakeFiles/pdpf_tests.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pdpf_tests.dir/build.make CMakeFiles/pdpf_tests.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=14,15 "Finished codegen for target pdpf_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=21,22 "Finished codegen for target pdpf_tests"
 .PHONY : CMakeFiles/pdpf_tests.dir/codegen
 
 # clean rule for target.
@@ -193,12 +202,12 @@ CMakeFiles/pdpf_tests.dir/clean:
 CMakeFiles/composite_fss_tests.dir/all: CMakeFiles/pdpf.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=1,2 "Built target composite_fss_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=7,8 "Built target composite_fss_tests"
 .PHONY : CMakeFiles/composite_fss_tests.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/composite_fss_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 11
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 12
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/composite_fss_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
 .PHONY : CMakeFiles/composite_fss_tests.dir/rule
@@ -210,13 +219,109 @@ composite_fss_tests: CMakeFiles/composite_fss_tests.dir/rule
 # codegen rule for target.
 CMakeFiles/composite_fss_tests.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=1,2 "Finished codegen for target composite_fss_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=7,8 "Finished codegen for target composite_fss_tests"
 .PHONY : CMakeFiles/composite_fss_tests.dir/codegen
 
 # clean rule for target.
 CMakeFiles/composite_fss_tests.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_tests.dir/build.make CMakeFiles/composite_fss_tests.dir/clean
 .PHONY : CMakeFiles/composite_fss_tests.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/composite_fss_test_suf_packing.dir
+
+# All Build rule for target.
+CMakeFiles/composite_fss_test_suf_packing.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=5,6 "Built target composite_fss_test_suf_packing"
+.PHONY : CMakeFiles/composite_fss_test_suf_packing.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/composite_fss_test_suf_packing.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/composite_fss_test_suf_packing.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
+.PHONY : CMakeFiles/composite_fss_test_suf_packing.dir/rule
+
+# Convenience name for target.
+composite_fss_test_suf_packing: CMakeFiles/composite_fss_test_suf_packing.dir/rule
+.PHONY : composite_fss_test_suf_packing
+
+# codegen rule for target.
+CMakeFiles/composite_fss_test_suf_packing.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=5,6 "Finished codegen for target composite_fss_test_suf_packing"
+.PHONY : CMakeFiles/composite_fss_test_suf_packing.dir/codegen
+
+# clean rule for target.
+CMakeFiles/composite_fss_test_suf_packing.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_test_suf_packing.dir/build.make CMakeFiles/composite_fss_test_suf_packing.dir/clean
+.PHONY : CMakeFiles/composite_fss_test_suf_packing.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/composite_fss_no_raw_open.dir
+
+# All Build rule for target.
+CMakeFiles/composite_fss_no_raw_open.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=3,4 "Built target composite_fss_no_raw_open"
+.PHONY : CMakeFiles/composite_fss_no_raw_open.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/composite_fss_no_raw_open.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/composite_fss_no_raw_open.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
+.PHONY : CMakeFiles/composite_fss_no_raw_open.dir/rule
+
+# Convenience name for target.
+composite_fss_no_raw_open: CMakeFiles/composite_fss_no_raw_open.dir/rule
+.PHONY : composite_fss_no_raw_open
+
+# codegen rule for target.
+CMakeFiles/composite_fss_no_raw_open.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=3,4 "Finished codegen for target composite_fss_no_raw_open"
+.PHONY : CMakeFiles/composite_fss_no_raw_open.dir/codegen
+
+# clean rule for target.
+CMakeFiles/composite_fss_no_raw_open.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/clean
+.PHONY : CMakeFiles/composite_fss_no_raw_open.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/bench_composite_fss.dir
+
+# All Build rule for target.
+CMakeFiles/bench_composite_fss.dir/all: CMakeFiles/pdpf.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=1,2 "Built target bench_composite_fss"
+.PHONY : CMakeFiles/bench_composite_fss.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/bench_composite_fss.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/bench_composite_fss.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles 0
+.PHONY : CMakeFiles/bench_composite_fss.dir/rule
+
+# Convenience name for target.
+bench_composite_fss: CMakeFiles/bench_composite_fss.dir/rule
+.PHONY : bench_composite_fss
+
+# codegen rule for target.
+CMakeFiles/bench_composite_fss.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/yuhan/Desktop/workspace/PDPF/build/CMakeFiles --progress-num=1,2 "Finished codegen for target bench_composite_fss"
+.PHONY : CMakeFiles/bench_composite_fss.dir/codegen
+
+# clean rule for target.
+CMakeFiles/bench_composite_fss.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/clean
+.PHONY : CMakeFiles/bench_composite_fss.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
