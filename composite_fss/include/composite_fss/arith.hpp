@@ -8,6 +8,10 @@ namespace cfss {
 // Share invariant: each party holds (party, value) and should never
 // reconstruct except via explicit open() in tests.
 
+inline std::uint64_t share_value(const Share &s) {
+    return s.v_;
+}
+
 struct RingConfig {
     std::uint32_t n_bits;
     std::uint64_t modulus_mask;

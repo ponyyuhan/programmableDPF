@@ -78,6 +78,9 @@ public:
     u64 value_internal() const = delete;
 #endif
 
+    // Internal-only accessor for protocol primitives; not part of the public API.
+    friend inline u64 share_value(const Share &s);
+
     friend struct RingConfig;
     friend Share add(const struct RingConfig &, const Share &, const Share &);
     friend Share sub(const struct RingConfig &, const Share &, const Share &);

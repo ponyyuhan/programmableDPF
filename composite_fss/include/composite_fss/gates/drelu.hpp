@@ -52,8 +52,7 @@ inline Share drelu_eval(const DreluKey &key,
     std::vector<std::uint64_t> out(1);
     PdpfProgramId pid = key.compiled.cmp_prog ? key.compiled.cmp_prog : key.compiled.pdpf_program;
     engine.eval_share(pid, party, in.hat, out);
-    std::uint64_t bit = out[0] & 1ULL;
-    return Share{party, bit};
+    return Share{party, out[0]};
 }
 
 // Select: returns bit ? a : b

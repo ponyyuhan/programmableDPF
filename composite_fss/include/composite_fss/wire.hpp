@@ -29,8 +29,8 @@ inline MaskedWire make_masked_wire(const RingConfig &cfg,
                                    const Share &x1,
                                    const Share &r0,
                                    const Share &r1) {
-    std::uint64_t r_sum = ring_add(cfg, r0.raw_value_unsafe(), r1.raw_value_unsafe());
-    std::uint64_t x_sum = ring_add(cfg, x0.raw_value_unsafe(), x1.raw_value_unsafe());
+    std::uint64_t r_sum = ring_add(cfg, share_value(r0), share_value(r1));
+    std::uint64_t x_sum = ring_add(cfg, share_value(x0), share_value(x1));
     MaskedWire w;
     w.hat = ring_add(cfg, x_sum, r_sum);
     w.x = x0;

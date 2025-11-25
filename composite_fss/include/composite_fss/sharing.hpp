@@ -35,6 +35,7 @@ struct MPCContext {
         return {Share{0, s0}, Share{1, s1}};
     }
 
+#if COMPOSITE_FSS_INTERNAL
     u64 reconstruct(const Share &a0, const Share &a1) const {
         unsigned bits = (ring.modulus_mask == ~0ULL)
                             ? 64u
@@ -42,6 +43,9 @@ struct MPCContext {
         RingConfig cfg = make_ring_config(bits);
         return debug_open(cfg, a0, a1);
     }
+#else
+    u64 reconstruct(const Share &, const Share &) const = delete;
+#endif
 
     Share add(const Share &a, const Share &b) const {
         unsigned bits = (ring.modulus_mask == ~0ULL)

@@ -198,6 +198,19 @@ composite_fss_no_raw_open/fast:
 .PHONY : composite_fss_no_raw_open/fast
 
 #=============================================================================
+# Target rules for targets named composite_fss_strict_spdz
+
+# Build rule for target.
+composite_fss_strict_spdz: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 composite_fss_strict_spdz
+.PHONY : composite_fss_strict_spdz
+
+# fast build rule for target.
+composite_fss_strict_spdz/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_strict_spdz.dir/build.make CMakeFiles/composite_fss_strict_spdz.dir/build
+.PHONY : composite_fss_strict_spdz/fast
+
+#=============================================================================
 # Target rules for targets named bench_composite_fss
 
 # Build rule for target.
@@ -281,6 +294,30 @@ composite_fss/tests/test_no_raw_open.s: composite_fss/tests/test_no_raw_open.cpp
 composite_fss/tests/test_no_raw_open.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_no_raw_open.dir/build.make CMakeFiles/composite_fss_no_raw_open.dir/composite_fss/tests/test_no_raw_open.cpp.s
 .PHONY : composite_fss/tests/test_no_raw_open.cpp.s
+
+composite_fss/tests/test_strict_spdz.o: composite_fss/tests/test_strict_spdz.cpp.o
+.PHONY : composite_fss/tests/test_strict_spdz.o
+
+# target to build an object file
+composite_fss/tests/test_strict_spdz.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_strict_spdz.dir/build.make CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cpp.o
+.PHONY : composite_fss/tests/test_strict_spdz.cpp.o
+
+composite_fss/tests/test_strict_spdz.i: composite_fss/tests/test_strict_spdz.cpp.i
+.PHONY : composite_fss/tests/test_strict_spdz.i
+
+# target to preprocess a source file
+composite_fss/tests/test_strict_spdz.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_strict_spdz.dir/build.make CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cpp.i
+.PHONY : composite_fss/tests/test_strict_spdz.cpp.i
+
+composite_fss/tests/test_strict_spdz.s: composite_fss/tests/test_strict_spdz.cpp.s
+.PHONY : composite_fss/tests/test_strict_spdz.s
+
+# target to generate assembly for a file
+composite_fss/tests/test_strict_spdz.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/composite_fss_strict_spdz.dir/build.make CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cpp.s
+.PHONY : composite_fss/tests/test_strict_spdz.cpp.s
 
 composite_fss/tests/test_suf_packing.o: composite_fss/tests/test_suf_packing.cpp.o
 .PHONY : composite_fss/tests/test_suf_packing.o
@@ -580,6 +617,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... bench_composite_fss"
 	@echo "... composite_fss_no_raw_open"
+	@echo "... composite_fss_strict_spdz"
 	@echo "... composite_fss_test_suf_packing"
 	@echo "... composite_fss_tests"
 	@echo "... pdpf"
@@ -594,6 +632,9 @@ help:
 	@echo "... composite_fss/tests/test_no_raw_open.o"
 	@echo "... composite_fss/tests/test_no_raw_open.i"
 	@echo "... composite_fss/tests/test_no_raw_open.s"
+	@echo "... composite_fss/tests/test_strict_spdz.o"
+	@echo "... composite_fss/tests/test_strict_spdz.i"
+	@echo "... composite_fss/tests/test_strict_spdz.s"
 	@echo "... composite_fss/tests/test_suf_packing.o"
 	@echo "... composite_fss/tests/test_suf_packing.i"
 	@echo "... composite_fss/tests/test_suf_packing.s"

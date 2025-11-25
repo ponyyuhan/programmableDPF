@@ -57,7 +57,21 @@ inline PackedSufProgram compile_suf_desc_packed(const SufDesc &desc,
     SufChannelRegistry reg;
     reg.channels = channels;
     reg.next_id = static_cast<uint32_t>(channels.size());
+#if COMPOSITE_FSS_INTERNAL
     SufPackedLayout layout = layout_hint.has_value() ? *layout_hint : make_greedy_packed_layout(reg, word_bitwidth);
+#else
+    // Strict build: disable bit packing; each channel occupies its own word.
+    SufPackedLayout layout;
+    layout.word_bitwidth = word_bitwidth;
+    for (const auto &ch : reg.channels) {
+        for (uint32_t i = 0; i < ch.count; ++i) {
+            SufChannelField logical{ch.channel_id, i, ch.width_bits};
+            SufPackedField pf{logical, static_cast<uint32_t>(layout.fields.size()), 0};
+            layout.fields.push_back(pf);
+        }
+    }
+    layout.num_words = static_cast<uint32_t>(layout.fields.size());
+#endif
 
     if (desc.shape.domain_bits == 0) throw std::runtime_error("SufDesc: n_bits must be > 0");
     std::size_t domain_size = 1ULL << desc.shape.domain_bits;

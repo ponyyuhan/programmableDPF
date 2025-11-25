@@ -60,6 +60,12 @@ add_executable(composite_fss_no_raw_open composite_fss/tests/test_no_raw_open.cp
 target_include_directories(composite_fss_no_raw_open PRIVATE composite_fss/include)
 target_compile_definitions(composite_fss_no_raw_open PRIVATE COMPOSITE_FSS_INTERNAL=0)
 
+# Strict-mode SPDZ regression tests (no raw getters, share-only paths).
+add_executable(composite_fss_strict_spdz composite_fss/tests/test_strict_spdz.cpp)
+target_include_directories(composite_fss_strict_spdz PRIVATE composite_fss/include pdpf/include)
+target_link_libraries(composite_fss_strict_spdz PRIVATE pdpf)
+target_compile_definitions(composite_fss_strict_spdz PRIVATE COMPOSITE_FSS_INTERNAL=0)
+
 # Microbenchmark harness
 add_executable(bench_composite_fss composite_fss/bench/bench_composite_fss.cpp)
 target_include_directories(bench_composite_fss PRIVATE composite_fss/include pdpf/include)

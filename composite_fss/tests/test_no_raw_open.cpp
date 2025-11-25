@@ -1,5 +1,6 @@
 #define COMPOSITE_FSS_INTERNAL 0
 #include "../include/composite_fss/ring.hpp"
+#include "../include/composite_fss/gates/gelu.hpp"
 
 #include <type_traits>
 #include <utility>

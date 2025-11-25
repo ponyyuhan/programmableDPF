@@ -31,6 +31,7 @@ struct NExpGateKeyPair {
 inline NExpGateKeyPair gen_nexp_gate(const NExpGateParams &params,
                                      PdpfEngine &engine,
                                      std::mt19937_64 &rng) {
+    Ring64 ring(params.n_bits);
     RingConfig cfg = make_ring_config(params.n_bits);
     std::uniform_int_distribution<std::uint64_t> dist(0, cfg.modulus_mask);
     std::uint64_t r_in = dist(rng);
@@ -46,7 +47,7 @@ inline NExpGateKeyPair gen_nexp_gate(const NExpGateParams &params,
     double scale = static_cast<double>(1ULL << params.f);
     for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
         std::uint64_t x = ring_sub(cfg, static_cast<std::uint64_t>(x_hat), r_in);
-        double xr = static_cast<double>(static_cast<std::int64_t>(x)) / scale;
+        double xr = static_cast<double>(ring.to_signed(x)) / scale;
         double val = std::exp(-xr);
         std::int64_t fp = static_cast<std::int64_t>(std::llround(val * scale));
         table[x_hat] = ring_add(cfg, static_cast<std::uint64_t>(fp), r_out);
@@ -79,7 +80,7 @@ inline std::pair<Share, Share> nexpgate_eval_from_share_pair(const RingConfig &c
     // Mask input
     Share zhat0 = add(cfg, z0, k0.r_in_share);
     Share zhat1 = add(cfg, z1, k1.r_in_share);
-    std::uint64_t hat = open_share_pair(cfg, zhat0, zhat1);
+    std::uint64_t hat = ring_add(cfg, share_value(zhat0), share_value(zhat1));
 
     // Eval PDPF on masked input
     auto y0 = nexpgate_eval(0, k0, hat, engine);

@@ -2,6 +2,7 @@
 
 #include "pdpf.hpp"
 #include <functional>
+#include <limits>
 #include <random>
 #include <stdexcept>
 #include <unordered_map>
@@ -59,7 +60,9 @@ public:
         } else if (idx >= (data.table.size() / data.desc.output_words)) {
             idx %= (data.table.size() / data.desc.output_words);
         }
-        std::uint64_t share_mask = mask;
+        std::uint64_t share_mask = (n_bits_cap_ >= 64)
+                                       ? std::numeric_limits<std::uint64_t>::max()
+                                       : ((1ULL << n_bits_cap_) - 1ULL);
         for (unsigned w = 0; w < data.desc.output_words; ++w) {
             std::uint64_t val = data.table[idx * data.desc.output_words + w];
             std::uint64_t val_masked = val & share_mask;

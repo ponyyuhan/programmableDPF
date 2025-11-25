@@ -970,20 +970,12 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_to_lut.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_eval.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/gelu.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../beaver.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../wire.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/nexp.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../pdpf_adapter.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/inv.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/drelu.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/beaver.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/recsqrt.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/wire.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_eval.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_to_lut.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_packing.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_unpack.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/istream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__ostream/basic_ostream.h \
@@ -1018,4 +1010,43 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/deque \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/stack \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/print \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/unistd.h
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/unistd.h \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/drelu.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax_block.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/beaver.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/recip.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/recsqrt.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/wire.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_eval.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_to_lut.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_packing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_unpack.hpp \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/chrono \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/file_clock.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/calendar.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/day.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/exception.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/hh_mm_ss.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/literals.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/year.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/local_info.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/month.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/month_weekday.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/weekday.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/monthday.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/sys_info.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/year_month.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/year_month_day.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/year_month_weekday.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/formatter.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/concepts.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/convert_to_tm.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/zoned_time.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/ostream.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__chrono/parser_std_format_spec.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/sstream \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/forward_list \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/charconv \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_integral.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/from_chars_result.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__charconv/to_chars.h

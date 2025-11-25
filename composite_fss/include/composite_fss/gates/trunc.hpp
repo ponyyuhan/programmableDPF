@@ -15,6 +15,7 @@ struct LRSKey {
     unsigned f;
     u64 r_in;
     u64 r_out_tilde;
+    Share r_out_share;
     SufCompiled compiled; // x_hat -> (x>>f) + r_out_tilde (logical)
 };
 
@@ -30,6 +31,7 @@ inline LRSKeyPair lrs_gen(unsigned n_bits,
     Ring64 ring(n_bits);
     u64 r_in = dealer_ctx.rng() & ring.modulus_mask;
     u64 r_out_tilde = dealer_ctx.rng() & ring.modulus_mask;
+    auto r_out_shares = dealer_ctx.share_value(r_out_tilde);
     std::size_t size = 1ULL << n_bits;
     std::vector<std::uint64_t> table(size);
     for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
@@ -43,19 +45,32 @@ inline LRSKeyPair lrs_gen(unsigned n_bits,
     auto compiled = compile_suf_to_pdpf(suf, engine);
 
     LRSKeyPair pair;
-    pair.k0 = LRSKey{f, r_in, r_out_tilde, compiled};
-    pair.k1 = LRSKey{f, r_in, r_out_tilde, compiled};
+    pair.k0 = LRSKey{f, r_in, r_out_tilde, r_out_shares.first, compiled};
+    pair.k1 = LRSKey{f, r_in, r_out_tilde, r_out_shares.second, compiled};
     return pair;
 }
 
 inline Share lrs_eval(int party,
                       const LRSKey &key,
                       u64 x_hat,
-                      PdpfEngine &engine,
-                      MPCContext & /*ctx*/) {
+                      PdpfEngine &engine) {
     std::vector<std::uint64_t> out(1);
     engine.eval_share(key.compiled.pdpf_program, party, x_hat, out);
-    return Share{party, out[0]};
+    RingConfig cfg = make_ring_config(key.compiled.domain_bits);
+    Share y{party, out[0]};
+    return sub(cfg, y, key.r_out_share);
+}
+
+inline std::pair<Share, Share> lrs_eval_from_share_pair(const RingConfig &cfg,
+                                                        const LRSKey &k0,
+                                                        const LRSKey &k1,
+                                                        const Share &x0,
+                                                        const Share &x1,
+                                                        PdpfEngine &engine) {
+    std::uint64_t hat = ring_add(cfg, ring_add(cfg, share_value(x0), share_value(x1)), k0.r_in);
+    auto y0 = lrs_eval(0, k0, hat, engine);
+    auto y1 = lrs_eval(1, k1, hat, engine);
+    return {y0, y1};
 }
 
 struct ARSKey {

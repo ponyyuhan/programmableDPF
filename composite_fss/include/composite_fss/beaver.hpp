@@ -65,8 +65,8 @@ inline MulLocal mul_prepare(const RingConfig &cfg,
                             const Share &y,
                             const BeaverTriple &triple) {
     MulLocal m;
-    m.d = ring_sub(cfg, x.value_internal(), triple.a);
-    m.e = ring_sub(cfg, y.value_internal(), triple.b);
+    m.d = ring_sub(cfg, share_value(x), triple.a);
+    m.e = ring_sub(cfg, share_value(y), triple.b);
     return m;
 }
 
@@ -128,6 +128,65 @@ inline std::vector<Share> beaver_mul_batch(BeaverPool &pool,
 
 inline Share constant(const RingConfig &cfg, std::uint64_t v, int party) {
     return Share{party, v & cfg.modulus_mask};
+}
+
+#if COMPOSITE_FSS_INTERNAL
+// Single-process helper: multiply two shared values when both party shares are available.
+inline std::pair<Share, Share> beaver_mul_pair(const RingConfig &cfg,
+                                               const Share &x0,
+                                               const Share &x1,
+                                               const Share &y0,
+                                               const Share &y1) {
+    std::uint64_t x = ring_add(cfg, share_value(x0), share_value(x1));
+    std::uint64_t y = ring_add(cfg, share_value(y0), share_value(y1));
+    std::uint64_t prod = ring_mul(cfg, x, y);
+    return {Share{0, prod}, Share{1, 0}};
+}
+#else
+inline std::pair<Share, Share> beaver_mul_pair(const RingConfig &,
+                                               const Share &,
+                                               const Share &,
+                                               const Share &,
+                                               const Share &) = delete;
+#endif
+
+// Single-process simulator: given both parties' shares, return an additive sharing of the product.
+inline std::pair<Share, Share> beaver_mul_sim_pair(const RingConfig &cfg,
+                                                   const Share &x0,
+                                                   const Share &x1,
+                                                   const Share &y0,
+                                                   const Share &y1) {
+    std::uint64_t x = ring_add(cfg, share_value(x0), share_value(x1));
+    std::uint64_t y = ring_add(cfg, share_value(y0), share_value(y1));
+    std::uint64_t prod = ring_mul(cfg, x, y);
+    return {Share{0, prod}, Share{1, 0}};
+}
+
+// Two-party Beaver multiplication using correlated triple pools (single-process simulation).
+inline std::pair<Share, Share> beaver_mul_pair_from_pools(const RingConfig &cfg,
+                                                          BeaverPool &pool0,
+                                                          BeaverPool &pool1,
+                                                          const Share &x0,
+                                                          const Share &x1,
+                                                          const Share &y0,
+                                                          const Share &y1) {
+    BeaverTriple pub0 = pool0.next_triple_public();
+    pool1.next_triple_public(); // keep PRNG streams aligned
+    BeaverTriple t0 = pool0.share_triple(pub0);
+    BeaverTriple t1_dummy = pool1.share_triple(pub0);
+    (void)t1_dummy; // randomness consumed for symmetry
+    BeaverTriple t1{ring_sub(cfg, pub0.a, t0.a),
+                    ring_sub(cfg, pub0.b, t0.b),
+                    ring_sub(cfg, pub0.c, t0.c)};
+    pool0.bump_triple();
+    pool1.bump_triple();
+
+    MulLocal m0 = mul_prepare(cfg, x0, y0, t0);
+    MulLocal m1 = mul_prepare(cfg, x1, y1, t1);
+    auto [d_open, e_open] = mul_open(cfg, m0, m1);
+    Share z0 = mul_finish(cfg, 0, t0, d_open, e_open);
+    Share z1 = mul_finish(cfg, 1, t1, d_open, e_open);
+    return {z0, z1};
 }
 
 } // namespace cfss

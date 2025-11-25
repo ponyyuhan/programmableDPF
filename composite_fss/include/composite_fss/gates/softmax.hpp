@@ -7,8 +7,10 @@
 #include "nexp.hpp"
 #include "inv.hpp"
 #include "drelu.hpp"
+#include "trunc.hpp"
 #include <vector>
 #include <random>
+#include <iostream>
 
 namespace cfss {
 
@@ -20,12 +22,16 @@ struct SoftmaxParams {
 
 struct SoftmaxKey {
     SoftmaxParams params;
+    unsigned inv_f = 0; // fractional bits of the inverse output
+    unsigned trunc_shift = 0;
     // One DReLU per comparison step in the linear scan.
     std::vector<DreluKey> drelu_keys;
     // One nExp key per element.
     std::vector<NExpGateKey> nexp_keys;
     // One Inv key for the denominator.
     InvGateKey inv_key;
+    // Truncation for normalization.
+    LRSKey trunc_key;
 };
 
 struct SoftmaxKeyPair {
@@ -38,6 +44,11 @@ inline SoftmaxKeyPair softmax_keygen(const SoftmaxParams &params,
                                      std::mt19937_64 &rng) {
     SoftmaxKeyPair kp;
     kp.k0.params = kp.k1.params = params;
+    // Choose a safe fractional precision for the inverse: f + inv_f <= n_bits - 1.
+    unsigned inv_f = std::min<unsigned>(params.n_bits - 2, params.f + 6);
+    kp.k0.inv_f = kp.k1.inv_f = inv_f;
+    unsigned trunc_shift = (inv_f > params.f) ? (inv_f - params.f) : 0;
+    kp.k0.trunc_shift = kp.k1.trunc_shift = trunc_shift;
 
     // DReLU masks for k-1 comparisons.
     kp.k0.drelu_keys.resize(params.vec_len - 1);
@@ -59,10 +70,20 @@ inline SoftmaxKeyPair softmax_keygen(const SoftmaxParams &params,
     }
 
     // Single Inv key for the denominator.
-    InvGateParams ip{params.n_bits, params.f, static_cast<unsigned>(params.vec_len * 2)};
+    InvGateParams ip{
+        params.n_bits,
+        kp.k0.inv_f,
+        static_cast<unsigned>(params.vec_len * (1u << params.f))
+    };
     auto ikeys = gen_inv_gate(ip, engine, rng);
     kp.k0.inv_key = ikeys.k0;
     kp.k1.inv_key = ikeys.k1;
+
+    // Truncation key for normalization by 2^{inv_f}.
+    MPCContext dealer_ctx(params.n_bits, rng());
+    auto trunc_keys = lrs_gen(params.n_bits, trunc_shift, engine, dealer_ctx);
+    kp.k0.trunc_key = trunc_keys.k0;
+    kp.k1.trunc_key = trunc_keys.k1;
     return kp;
 }
 
@@ -102,17 +123,16 @@ softmax_eval_pair(PdpfEngine &engine,
         // Mask diff
         Share masked0 = add(cfg, diff0, k0.drelu_keys[i - 1].r_in);
         Share masked1 = add(cfg, diff1, k1.drelu_keys[i - 1].r_in);
-        std::uint64_t hat_diff = open_share_pair(cfg, masked0, masked1);
+        std::uint64_t hat_diff = ring_add(cfg, share_value(masked0), share_value(masked1));
         MaskedWire diff_wire0{hat_diff, diff0, k0.drelu_keys[i - 1].r_in};
         MaskedWire diff_wire1{hat_diff, diff1, k1.drelu_keys[i - 1].r_in};
         Share bit0 = drelu_eval(k0.drelu_keys[i - 1], diff_wire0, engine, 0);
         Share bit1 = drelu_eval(k1.drelu_keys[i - 1], diff_wire1, engine, 1);
         Share delta0 = sub(cfg, cur0[i], x_max0);
         Share delta1 = sub(cfg, cur1[i], x_max1);
-        Share prod0 = beaver_mul(pool0, cfg, bit0, delta0);
-        Share prod1 = beaver_mul(pool1, cfg, bit1, delta1);
-        x_max0 = add(cfg, x_max0, prod0);
-        x_max1 = add(cfg, x_max1, prod1);
+        auto prod_pair = beaver_mul_pair_from_pools(cfg, pool0, pool1, bit0, bit1, delta0, delta1);
+        x_max0 = add(cfg, x_max0, prod_pair.first);
+        x_max1 = add(cfg, x_max1, prod_pair.second);
     }
 
     // z_i = x_max - x_i
@@ -131,7 +151,7 @@ softmax_eval_pair(PdpfEngine &engine,
         exp1[i] = e1;
     }
 
-    // denom = sum exp_i
+    // denom = sum exp_i (shares)
     Share denom0 = exp0[0];
     Share denom1 = exp1[0];
     for (std::size_t i = 1; i < k; ++i) {
@@ -139,18 +159,20 @@ softmax_eval_pair(PdpfEngine &engine,
         denom1 = add(cfg, denom1, exp1[i]);
     }
 
-    // inv_denom = 1/denom using masked inv.
-    auto [inv0, inv1] = invgate_eval_from_share_pair(cfg, k0.inv_key, k1.inv_key, denom0, denom1, engine);
+    // Add tiny epsilon (1 ULP in Q_f) to avoid zero.
+    denom0 = add_const(cfg, denom0, 1ULL);
 
-    // Normalize with Beaver multiplication and fixed-point truncation.
+    // Inverse: Q_inv_f
+    auto inv_pair = invgate_eval_from_share_pair(cfg, k0.inv_key, k1.inv_key, denom0, denom1, engine);
+    Share inv0 = inv_pair.first;
+    Share inv1 = inv_pair.second;
+
+    // Normalize with Beaver mul + LRS truncation.
     for (std::size_t i = 0; i < k; ++i) {
-        Share prod0 = beaver_mul(pool0, cfg, exp0[i], inv0);
-        Share prod1 = beaver_mul(pool1, cfg, exp1[i], inv1);
-        // Fixed-point truncation by f bits (logical shift).
-        prod0 = Share{prod0.party(), prod0.value_internal() >> k0.params.f};
-        prod1 = Share{prod1.party(), prod1.value_internal() >> k0.params.f};
-        out0.y[i] = prod0;
-        out1.y[i] = prod1;
+        auto prod_pair = beaver_mul_pair_from_pools(cfg, pool0, pool1, exp0[i], exp1[i], inv0, inv1);
+        auto norm_pair = lrs_eval_from_share_pair(cfg, k0.trunc_key, k1.trunc_key, prod_pair.first, prod_pair.second, engine);
+        out0.y[i] = norm_pair.first;
+        out1.y[i] = norm_pair.second;
     }
 
     return {out0, out1};
