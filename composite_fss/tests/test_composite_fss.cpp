@@ -423,11 +423,13 @@ int main() {
         auto recip_keys = gen_recip_gate(rp, engine, rng_recip);
         bool ok = true;
         RingConfig cfg = make_ring_config(N_BITS);
+        BeaverPool pool0(cfg, 0xDADA1, 0);
+        BeaverPool pool1(cfg, 0xDADA1, 1);
         for (int i = 1; i <= 20; ++i) {
             double real = static_cast<double>(i);
             u64 x_fp = ring.from_signed(static_cast<std::int64_t>(std::llround(real * static_cast<double>(1ULL << rp.f_in))));
             auto shares = dealer_ctx.share_value(x_fp);
-            auto rec_pair = recip_eval_from_share_pair(cfg, recip_keys.k0, recip_keys.k1, shares.first, shares.second, engine);
+            auto rec_pair = recip_eval_from_share_pair(cfg, recip_keys.k0, recip_keys.k1, shares.first, shares.second, engine, pool0, pool1);
             u64 rec_hat = ring.add(share_value(rec_pair.first), share_value(rec_pair.second));
             double rec_fp = static_cast<double>(ring.to_signed(rec_hat)) / static_cast<double>(1ULL << rp.f_out);
             double rec_ref = 1.0 / real;

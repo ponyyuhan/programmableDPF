@@ -1032,6 +1032,8 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_to_lut.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/suf_unpack.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/wire.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/gez.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/trunc.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/drelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/gelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/include/composite_fss/gates/gez.hpp \

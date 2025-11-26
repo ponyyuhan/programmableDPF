@@ -46,10 +46,12 @@ int main(int argc, char **argv) {
         gp.clip = 3.0;
         auto kp = gelu_gen(gp, engine, dealer);
         RingConfig cfg = make_ring_config(n_bits);
+        BeaverPool pool0(cfg, 0xABCDEF, 0);
+        BeaverPool pool1(cfg, 0xABCDEF, 1);
         for (auto h : hats) {
             auto r0 = gelu_eval_main(0, kp.k0, h, engine);
             auto r1 = gelu_eval_main(1, kp.k1, h, engine);
-            auto out_pair = gelu_finish(cfg, kp.k0, kp.k1, r0, r1, engine);
+            auto out_pair = gelu_finish(cfg, kp.k0, kp.k1, r0, r1, pool0, pool1);
             (void)out_pair;
         }
     }
