@@ -73,6 +73,35 @@ inline std::pair<Share, Share> lrs_eval_from_share_pair(const RingConfig &cfg,
     return {y0, y1};
 }
 
+inline std::pair<std::vector<Share>, std::vector<Share>>
+lrs_eval_batch_from_share_pair(const RingConfig &cfg,
+                               const LRSKey &k0,
+                               const LRSKey &k1,
+                               const std::vector<Share> &x0,
+                               const std::vector<Share> &x1,
+                               PdpfEngine &engine) {
+    std::size_t n = x0.size();
+    std::vector<Share> out0(n), out1(n);
+    if (x1.size() != n || n == 0) return {out0, out1};
+
+    std::vector<std::uint64_t> hats(n);
+    for (std::size_t i = 0; i < n; ++i) {
+        hats[i] = ring_add(cfg, ring_add(cfg, share_value(x0[i]), share_value(x1[i])), k0.r_in);
+    }
+    LutProgramDesc desc = engine.lookup_lut_desc(k0.compiled.pdpf_program);
+    std::size_t out_words = desc.output_words ? desc.output_words : 1;
+    std::vector<std::uint64_t> flat0(n * out_words, 0), flat1(n * out_words, 0);
+    engine.eval_share_batch(k0.compiled.pdpf_program, 0, hats.data(), n, flat0.data());
+    engine.eval_share_batch(k1.compiled.pdpf_program, 1, hats.data(), n, flat1.data());
+    for (std::size_t i = 0; i < n; ++i) {
+        Share y0{0, flat0[i * out_words]};
+        Share y1{1, flat1[i * out_words]};
+        out0[i] = sub(cfg, y0, k0.r_out_share);
+        out1[i] = sub(cfg, y1, k1.r_out_share);
+    }
+    return {out0, out1};
+}
+
 struct ARSKey {
     unsigned n_bits;
     unsigned f;

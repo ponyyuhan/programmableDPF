@@ -1,1 +1,1 @@
-/usr/bin/c++  -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cpp.o -o composite_fss_strict_spdz  libpdpf.a
+/usr/bin/c++  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cpp.o -o composite_fss_strict_spdz  libpdpf.a

@@ -223,6 +223,19 @@ bench_composite_fss/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/build
 .PHONY : bench_composite_fss/fast
 
+#=============================================================================
+# Target rules for targets named bench_fss
+
+# Build rule for target.
+bench_fss: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 bench_fss
+.PHONY : bench_fss
+
+# fast build rule for target.
+bench_fss/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_fss.dir/build.make CMakeFiles/bench_fss.dir/build
+.PHONY : bench_fss/fast
+
 composite_fss/bench/bench_composite_fss.o: composite_fss/bench/bench_composite_fss.cpp.o
 .PHONY : composite_fss/bench/bench_composite_fss.o
 
@@ -246,6 +259,30 @@ composite_fss/bench/bench_composite_fss.s: composite_fss/bench/bench_composite_f
 composite_fss/bench/bench_composite_fss.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_composite_fss.dir/build.make CMakeFiles/bench_composite_fss.dir/composite_fss/bench/bench_composite_fss.cpp.s
 .PHONY : composite_fss/bench/bench_composite_fss.cpp.s
+
+composite_fss/bench/bench_fss.o: composite_fss/bench/bench_fss.cpp.o
+.PHONY : composite_fss/bench/bench_fss.o
+
+# target to build an object file
+composite_fss/bench/bench_fss.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_fss.dir/build.make CMakeFiles/bench_fss.dir/composite_fss/bench/bench_fss.cpp.o
+.PHONY : composite_fss/bench/bench_fss.cpp.o
+
+composite_fss/bench/bench_fss.i: composite_fss/bench/bench_fss.cpp.i
+.PHONY : composite_fss/bench/bench_fss.i
+
+# target to preprocess a source file
+composite_fss/bench/bench_fss.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_fss.dir/build.make CMakeFiles/bench_fss.dir/composite_fss/bench/bench_fss.cpp.i
+.PHONY : composite_fss/bench/bench_fss.cpp.i
+
+composite_fss/bench/bench_fss.s: composite_fss/bench/bench_fss.cpp.s
+.PHONY : composite_fss/bench/bench_fss.s
+
+# target to generate assembly for a file
+composite_fss/bench/bench_fss.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench_fss.dir/build.make CMakeFiles/bench_fss.dir/composite_fss/bench/bench_fss.cpp.s
+.PHONY : composite_fss/bench/bench_fss.cpp.s
 
 composite_fss/tests/test_composite_fss.o: composite_fss/tests/test_composite_fss.cpp.o
 .PHONY : composite_fss/tests/test_composite_fss.o
@@ -616,6 +653,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... bench_composite_fss"
+	@echo "... bench_fss"
 	@echo "... composite_fss_no_raw_open"
 	@echo "... composite_fss_strict_spdz"
 	@echo "... composite_fss_test_suf_packing"
@@ -626,6 +664,9 @@ help:
 	@echo "... composite_fss/bench/bench_composite_fss.o"
 	@echo "... composite_fss/bench/bench_composite_fss.i"
 	@echo "... composite_fss/bench/bench_composite_fss.s"
+	@echo "... composite_fss/bench/bench_fss.o"
+	@echo "... composite_fss/bench/bench_fss.i"
+	@echo "... composite_fss/bench/bench_fss.s"
 	@echo "... composite_fss/tests/test_composite_fss.o"
 	@echo "... composite_fss/tests/test_composite_fss.i"
 	@echo "... composite_fss/tests/test_composite_fss.s"

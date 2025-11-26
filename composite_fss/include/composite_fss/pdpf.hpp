@@ -38,14 +38,54 @@ public:
                             std::uint64_t masked_x,
                             std::vector<std::uint64_t> &out_words) const = 0;
 
+    // Evaluate a batch of masked inputs for a single program. The caller must
+    // provide an output buffer of at least n_inputs * output_words entries.
+    virtual void eval_share_batch(PdpfProgramId program,
+                                  int party,
+                                  const std::uint64_t *masked_xs,
+                                  std::size_t n_inputs,
+                                  std::uint64_t *flat_out) const {
+        if (masked_xs == nullptr || flat_out == nullptr || n_inputs == 0) return;
+        auto desc = lookup_lut_desc(program);
+        std::size_t out_words = desc.output_words ? desc.output_words : 1;
+        std::vector<std::uint64_t> tmp(out_words);
+        for (std::size_t i = 0; i < n_inputs; ++i) {
+            eval_share(program, party, masked_xs[i], tmp);
+            for (std::size_t w = 0; w < out_words; ++w) {
+                flat_out[i * out_words + w] = tmp[w];
+            }
+        }
+    }
+
     // Optional batched evaluation; default implementation loops.
     virtual void eval_share_batch(PdpfProgramId program,
                                   int party,
                                   const std::vector<std::uint64_t> &masked_xs,
                                   std::vector<std::vector<std::uint64_t>> &out_batch) const {
-        out_batch.resize(masked_xs.size());
+        if (masked_xs.empty()) return;
+        auto desc = lookup_lut_desc(program);
+        std::size_t out_words = desc.output_words ? desc.output_words : 1;
+        out_batch.assign(masked_xs.size(), std::vector<std::uint64_t>(out_words, 0));
+        std::vector<std::uint64_t> flat(masked_xs.size() * out_words);
+        eval_share_batch(program, party, masked_xs.data(), masked_xs.size(), flat.data());
         for (std::size_t i = 0; i < masked_xs.size(); ++i) {
-            eval_share(program, party, masked_xs[i], out_batch[i]);
+            for (std::size_t w = 0; w < out_words; ++w) {
+                out_batch[i][w] = flat[i * out_words + w];
+            }
+        }
+    }
+
+    // Flattened batch evaluation: writes outputs consecutively into flat_out.
+    // flat_out will be resized to masked_xs.size() * output_words.
+    virtual void eval_share_batch(PdpfProgramId program,
+                                  int party,
+                                  const std::vector<std::uint64_t> &masked_xs,
+                                  std::vector<std::uint64_t> &flat_out) const {
+        auto desc = lookup_lut_desc(program);
+        std::size_t out_words = desc.output_words ? desc.output_words : 1;
+        flat_out.assign(masked_xs.size() * out_words, 0);
+        if (!masked_xs.empty()) {
+            eval_share_batch(program, party, masked_xs.data(), masked_xs.size(), flat_out.data());
         }
     }
 

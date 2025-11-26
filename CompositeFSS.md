@@ -1,13 +1,3 @@
-那我就直接往“paper 级别设计方案”上继续推进了：怎么在 **SHARK / Sigma 的思路基础上**，但不只是“小修小补”，而是设计一个 **新的 Composite‑FSS 框架**，同时压 keysize、减预处理和在线复杂度，而且可以覆盖 ReLU/ReluARS、GeLU/SiLU、Softmax/LayerNorm 这些 transformer 里的大头。
-
-我会分三块讲：
-
-1. 你这篇 paper 的“抽象贡献”应该长什么样。
-2. 一个比较完整的 **Composite‑FSS 设计蓝图**——包括核心思想、协议结构、复杂度为什么会优于 SHARK / Sigma。
-3. Paper 怎么写、哪些地方需要你去填细节和做实验。
-
----
-
 ## 0. 先定清楚目标：你要超越谁、在哪些指标上超越
 
 对照一下现状：

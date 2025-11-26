@@ -97,6 +97,8 @@ inline RecipKeyPair gen_recip_gate(const RecipParams &params,
     std::uint64_t bound_inv = std::min<std::uint64_t>(
         bound_scaled, static_cast<std::uint64_t>(std::numeric_limits<std::uint32_t>::max() - 1));
     InvGateParams ip{params.n_bits, inv_f, static_cast<unsigned>(bound_inv)};
+    ip.rsqrt = params.rsqrt;
+    ip.f_in = f_in_eff;
 
     auto inv_pair = gen_inv_gate(ip, engine, rng);
     MPCContext dealer_ctx(params.n_bits, rng());
@@ -140,6 +142,18 @@ inline std::pair<Share, Share> recip_eval_from_share_pair(const RingConfig &cfg,
                                                           PdpfEngine &engine,
                                                           BeaverPool &pool0,
                                                           BeaverPool &pool1) {
+    // Fast path: plain reciprocal without sign/clamp when not using rsqrt.
+    if (!k0.params.rsqrt) {
+        Share inv_in0 = x0;
+        Share inv_in1 = x1;
+        if (k0.shift_down > 0 && k0.pre_lrs.has_value() && k1.pre_lrs.has_value()) {
+            auto scaled_pair = lrs_eval_from_share_pair(cfg, *k0.pre_lrs, *k1.pre_lrs, x0, x1, engine);
+            inv_in0 = scaled_pair.first;
+            inv_in1 = scaled_pair.second;
+        }
+        return invgate_eval_from_share_pair(cfg, k0.inv_key, k1.inv_key, inv_in0, inv_in1, engine);
+    }
+
     // Sign bit: 1 if x >= 0.
     std::uint64_t x_hat = ring_add(cfg, ring_add(cfg, share_value(x0), share_value(x1)), k0.sign_gez.r_in);
     MPCContext sign_ctx0(cfg.n_bits, 0xC011AB5E);
@@ -184,12 +198,10 @@ inline std::pair<Share, Share> recip_eval_from_share_pair(const RingConfig &cfg,
         inv_in1 = scaled_pair.second;
     }
 
-    // Inversion on the scaled magnitude.
-    auto inv_pair = invgate_eval_from_share_pair(cfg, k0.inv_key, k1.inv_key, inv_in0, inv_in1, engine);
-
     // Clamp: if |x| > bound, return 0.
     Share zero0 = constant(cfg, 0, 0);
     Share zero1 = constant(cfg, 0, 1);
+    auto inv_pair = invgate_eval_from_share_pair(cfg, k0.inv_key, k1.inv_key, inv_in0, inv_in1, engine);
     auto clamped_pair = beaver_select_pair_from_pools(cfg, pool0, pool1, clamp0, clamp1,
                                                       inv_pair.first, inv_pair.second,
                                                       zero0, zero1);

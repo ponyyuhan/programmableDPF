@@ -92,4 +92,42 @@ inline std::pair<Share, Share> nexpgate_eval_from_share_pair(const RingConfig &c
     return {y0, y1};
 }
 
+// Batched nExp on secret shares; outputs vectors of the same length.
+inline std::pair<std::vector<Share>, std::vector<Share>>
+nexpgate_eval_batch_from_share_pair(const RingConfig &cfg,
+                                    const NExpGateKey &k0,
+                                    const NExpGateKey &k1,
+                                    const std::vector<Share> &z0,
+                                    const std::vector<Share> &z1,
+                                    PdpfEngine &engine) {
+    std::size_t n = z0.size();
+    std::vector<Share> out0(n), out1(n);
+    if (z1.size() != n) return {out0, out1};
+
+    std::vector<std::uint64_t> hats(n);
+    for (std::size_t i = 0; i < n; ++i) {
+        Share zhat0 = add(cfg, z0[i], k0.r_in_share);
+        Share zhat1 = add(cfg, z1[i], k1.r_in_share);
+        hats[i] = ring_add(cfg, share_value(zhat0), share_value(zhat1));
+    }
+
+    LutProgramDesc desc0 = engine.lookup_lut_desc(k0.prog);
+    std::size_t out_words = desc0.output_words ? desc0.output_words : 1;
+    std::vector<std::uint64_t> flat_out0(n * out_words, 0), flat_out1(n * out_words, 0);
+    engine.eval_share_batch(k0.prog, 0, hats.data(), n, flat_out0.data());
+    engine.eval_share_batch(k1.prog, 1, hats.data(), n, flat_out1.data());
+
+    for (std::size_t i = 0; i < n; ++i) {
+        std::uint64_t y0_raw = flat_out0[i * out_words];
+        std::uint64_t y1_raw = flat_out1[i * out_words];
+        Share y0{0, y0_raw};
+        Share y1{1, y1_raw};
+        y0 = sub(cfg, y0, k0.r_out_share);
+        y1 = sub(cfg, y1, k1.r_out_share);
+        out0[i] = y0;
+        out1[i] = y1;
+    }
+    return {out0, out1};
+}
+
 } // namespace cfss

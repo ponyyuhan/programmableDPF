@@ -5,6 +5,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+option(COMPOSITE_FSS_CUDA "Enable CUDA backend for composite_fss" OFF)
+if(COMPOSITE_FSS_CUDA)
+    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+endif()
+
 # Ensure Apple SDK include paths are available (fixes missing standard headers on some setups).
 if(APPLE)
     execute_process(COMMAND xcrun --show-sdk-path
@@ -71,3 +79,33 @@ add_executable(bench_composite_fss composite_fss/bench/bench_composite_fss.cpp)
 target_include_directories(bench_composite_fss PRIVATE composite_fss/include pdpf/include)
 target_link_libraries(bench_composite_fss PRIVATE pdpf)
 target_compile_definitions(bench_composite_fss PRIVATE COMPOSITE_FSS_INTERNAL=1)
+
+# Metrics/CSV microbench harness
+add_executable(bench_fss composite_fss/bench/bench_fss.cpp)
+target_include_directories(bench_fss PRIVATE composite_fss/include pdpf/include)
+target_link_libraries(bench_fss PRIVATE pdpf)
+target_compile_definitions(bench_fss PRIVATE COMPOSITE_FSS_INTERNAL=1)
+
+if(COMPOSITE_FSS_CUDA)
+    add_library(composite_fss_gpu STATIC
+        composite_fss/src/gpu/pdpf_engine_cuda.cu
+    )
+    target_include_directories(composite_fss_gpu PUBLIC composite_fss/include composite_fss/src)
+    target_link_libraries(composite_fss_gpu PUBLIC CUDA::cudart)
+    target_compile_definitions(composite_fss_gpu PUBLIC COMPOSITE_FSS_CUDA=1)
+
+    set(COMPOSITE_FSS_TARGETS
+        composite_fss_tests
+        composite_fss_test_suf_packing
+        composite_fss_no_raw_open
+        composite_fss_strict_spdz
+        bench_composite_fss
+        bench_fss
+    )
+
+    foreach(tgt IN LISTS COMPOSITE_FSS_TARGETS)
+        target_link_libraries(${tgt} PRIVATE composite_fss_gpu)
+        target_compile_definitions(${tgt} PRIVATE COMPOSITE_FSS_CUDA=1)
+        target_include_directories(${tgt} PRIVATE composite_fss/src)
+    endforeach()
+endif()

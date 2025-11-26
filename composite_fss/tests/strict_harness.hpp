@@ -16,14 +16,18 @@ struct StrictHarness {
     unsigned n_bits;
     Ring64 ring;
     RingConfig cfg;
+    EngineBackend backend;
     PdpfEngineAdapter engine;
     std::mt19937_64 rng;
 
-    explicit StrictHarness(unsigned n_bits_in = 16, std::uint64_t seed = 0xC0FFEEu)
+    explicit StrictHarness(unsigned n_bits_in = 16,
+                           std::uint64_t seed = 0xC0FFEEu,
+                           EngineBackend backend_in = select_backend_from_env())
         : n_bits(n_bits_in),
           ring(n_bits_in),
           cfg(make_ring_config(n_bits_in)),
-          engine(n_bits_in),
+          backend(backend_in),
+          engine(n_bits_in, 0xA5A5, backend_in),
           rng(seed) {}
 
     std::uint64_t reconstruct(const Share &a0, const Share &a1) const {

@@ -1,1 +1,1 @@
-/usr/bin/c++  -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/composite_fss_no_raw_open.dir/composite_fss/tests/test_no_raw_open.cpp.o -o composite_fss_no_raw_open
+/usr/bin/c++  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/composite_fss_no_raw_open.dir/composite_fss/tests/test_no_raw_open.cpp.o -o composite_fss_no_raw_open

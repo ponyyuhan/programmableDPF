@@ -147,6 +147,32 @@ public:
 
     void eval_share_batch(PdpfProgramId program,
                           int party,
+                          const std::uint64_t *masked_xs,
+                          std::size_t n_inputs,
+                          std::uint64_t *flat_out) const override {
+        if (program >= programs_.size()) {
+            throw std::runtime_error("PdpfEngineFullImpl: invalid program id");
+        }
+        if (masked_xs == nullptr || flat_out == nullptr || n_inputs == 0) return;
+        const auto &entry = programs_[program];
+        std::size_t out_words = entry.desc.output_words ? entry.desc.output_words : 1;
+        for (std::size_t i = 0; i < n_inputs; ++i) {
+            for (unsigned w = 0; w < out_words; ++w) {
+                std::int64_t acc = 0;
+                if (party == 0) {
+                    acc = lut_engine_->eval_point_offline(entry.impl->off[w], masked_xs[i]);
+                } else {
+                    acc = lut_engine_->eval_point_online(entry.impl->on[w], masked_xs[i]);
+                }
+                stats_.output_words += out_words;
+                flat_out[i * out_words + w] = static_cast<std::uint64_t>(acc);
+            }
+            stats_.evals++;
+        }
+    }
+
+    void eval_share_batch(PdpfProgramId program,
+                          int party,
                           const std::vector<std::uint64_t> &masked_xs,
                           std::vector<std::vector<std::uint64_t>> &out_batch) const override {
         out_batch.resize(masked_xs.size());
@@ -170,6 +196,31 @@ public:
                 }
                 stats_.output_words += entry.desc.output_words;
                 out_batch[i][w] = static_cast<std::uint64_t>(acc);
+            }
+            stats_.evals++;
+        }
+    }
+
+    void eval_share_batch(PdpfProgramId program,
+                          int party,
+                          const std::vector<std::uint64_t> &masked_xs,
+                          std::vector<std::uint64_t> &flat_out) const override {
+        if (program >= programs_.size()) {
+            throw std::runtime_error("PdpfEngineFullImpl: invalid program id");
+        }
+        const auto &entry = programs_[program];
+        std::size_t out_words = entry.desc.output_words ? entry.desc.output_words : 1;
+        flat_out.assign(masked_xs.size() * out_words, 0);
+        for (std::size_t i = 0; i < masked_xs.size(); ++i) {
+            for (unsigned w = 0; w < out_words; ++w) {
+                std::int64_t acc = 0;
+                if (party == 0) {
+                    acc = lut_engine_->eval_point_offline(entry.impl->off[w], masked_xs[i]);
+                } else {
+                    acc = lut_engine_->eval_point_online(entry.impl->on[w], masked_xs[i]);
+                }
+                stats_.output_words += out_words;
+                flat_out[i * out_words + w] = static_cast<std::uint64_t>(acc);
             }
             stats_.evals++;
         }

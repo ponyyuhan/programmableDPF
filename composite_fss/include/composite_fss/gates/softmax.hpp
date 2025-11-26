@@ -168,12 +168,16 @@ softmax_eval_pair(PdpfEngine &engine,
     Share inv1 = inv_pair.second;
 
     // Normalize with Beaver mul + LRS truncation.
+    std::vector<Share> prod0(k), prod1(k);
     for (std::size_t i = 0; i < k; ++i) {
         auto prod_pair = beaver_mul_pair_from_pools(cfg, pool0, pool1, exp0[i], exp1[i], inv0, inv1);
-        auto norm_pair = lrs_eval_from_share_pair(cfg, k0.trunc_key, k1.trunc_key, prod_pair.first, prod_pair.second, engine);
-        out0.y[i] = norm_pair.first;
-        out1.y[i] = norm_pair.second;
+        prod0[i] = prod_pair.first;
+        prod1[i] = prod_pair.second;
     }
+    auto norm_batch = lrs_eval_batch_from_share_pair(cfg, k0.trunc_key, k1.trunc_key,
+                                                     prod0, prod1, engine);
+    out0.y = std::move(norm_batch.first);
+    out1.y = std::move(norm_batch.second);
 
     return {out0, out1};
 }

@@ -14,6 +14,8 @@ struct InvGateParams {
     unsigned n_bits;
     unsigned f;      // fractional bits
     unsigned max_d;  // maximum denominator (inclusive)
+    bool rsqrt = false;
+    unsigned f_in = 0; // input fractional bits, only used for rsqrt
 };
 
 struct InvGateKey {
@@ -53,10 +55,15 @@ inline InvGateKeyPair gen_inv_gate(const InvGateParams &params,
     std::vector<std::uint64_t> table(size);
 
     double scale = static_cast<double>(1ULL << params.f);
+    double scale_in = (params.rsqrt && params.f_in > 0) ? static_cast<double>(1ULL << params.f_in) : 1.0;
     for (std::size_t x_hat = 0; x_hat < size; ++x_hat) {
         std::uint64_t x = (static_cast<std::uint64_t>(x_hat) + size - (r_in & domain_mask)) & domain_mask;
         std::uint64_t den = (x == 0) ? 1 : (x % bound);
         double val = 1.0 / static_cast<double>(den);
+        if (params.rsqrt) {
+            double real_x = static_cast<double>(den) / scale_in;
+            val = 1.0 / std::sqrt(real_x);
+        }
         std::int64_t fp = static_cast<std::int64_t>(std::llround(val * scale));
         table[x_hat] = ring_add(dom_cfg, static_cast<std::uint64_t>(fp), r_out);
     }

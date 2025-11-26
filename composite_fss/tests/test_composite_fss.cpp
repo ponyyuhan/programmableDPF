@@ -37,7 +37,7 @@ int main() {
     std::mt19937_64 rng(0xDEADBEEF);
 
     MPCContext dealer_ctx(N_BITS, 0x12345678);
-    PdpfEngineAdapter engine(N_BITS);
+    PdpfEngineAdapter engine(N_BITS, 0xA5A5, select_backend_from_env());
 
     auto reconstruct = [&](const Share &a0, const Share &a1) {
         return ring.add(a0.raw_value_unsafe(), a1.raw_value_unsafe());
@@ -468,7 +468,7 @@ int main() {
         }());
         auto stacked = stack_suf_outputs({f0, f1, f2});
         auto multi = compile_suf_to_lut_multi(stacked);
-        PdpfEngineAdapter eng_vec(nbits);
+        PdpfEngineAdapter eng_vec(nbits, 0xA5A5, select_backend_from_env());
         PdpfProgramId pid = eng_vec.make_lut_program(multi.desc, multi.table_flat);
         std::mt19937_64 rng_vec(123);
         bool ok = true;

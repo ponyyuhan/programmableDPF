@@ -56,4 +56,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/composite_fss_no_raw_open.dir/DependInfo.cmake"
   "CMakeFiles/composite_fss_strict_spdz.dir/DependInfo.cmake"
   "CMakeFiles/bench_composite_fss.dir/DependInfo.cmake"
+  "CMakeFiles/bench_fss.dir/DependInfo.cmake"
   )

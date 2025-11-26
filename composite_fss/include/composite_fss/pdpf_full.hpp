@@ -32,9 +32,24 @@ public:
 
     void eval_share_batch(PdpfProgramId program,
                           int party,
+                          const std::uint64_t *masked_xs,
+                          std::size_t n_inputs,
+                          std::uint64_t *flat_out) const override {
+        adapter_.eval_share_batch(program, party, masked_xs, n_inputs, flat_out);
+    }
+
+    void eval_share_batch(PdpfProgramId program,
+                          int party,
                           const std::vector<std::uint64_t> &masked_xs,
                           std::vector<std::vector<std::uint64_t>> &out_batch) const override {
         adapter_.eval_share_batch(program, party, masked_xs, out_batch);
+    }
+
+    void eval_share_batch(PdpfProgramId program,
+                          int party,
+                          const std::vector<std::uint64_t> &masked_xs,
+                          std::vector<std::uint64_t> &flat_out) const override {
+        adapter_.eval_share_batch(program, party, masked_xs, flat_out);
     }
 
     LutProgramDesc lookup_lut_desc(PdpfProgramId program) const override {

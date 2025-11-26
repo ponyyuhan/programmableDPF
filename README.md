@@ -1,87 +1,108 @@
-# Programmable Distributed Point Functions (PDPF) – C++ Skeleton
+# PDPF & Composite-FSS Library
 
-This repository contains a C++ implementation of the small-domain programmable DPF construction (Boyle–Gilboa–Ishai–Kolobov, 2023) plus scaffolding for group payloads and Reed–Muller based amplification. It is organized as a library with demos/tests.
+This repo bundles two related components:
 
-## Layout
+1) **pdpf/** — a C++ implementation of small-domain programmable DPFs (Boyle–Gilboa–Ishai–Kolobov, 2023) plus group payloads and Reed–Muller-based amplification scaffolding.
+2) **composite_fss/** — a higher-level MPC/FSS library that builds transformer-style nonlinear gates (GeLU/SiLU, softmax, reciprocal/rsqrt, norm, truncation) on top of PDPF + Beaver triples, with strict “no-open” discipline, packed SUF→PDPF compilation, batching, and optional GPU offload.
+
+The codebase also ships benchmarks and strict harnesses to validate correctness and measure LUT/keygen/online costs.
+
+## Repository layout
 
 ```
-pdpf/
-  include/pdpf/...   // public headers
-  src/...            // implementations
-  tests/             // simple test driver
-CMakeLists.txt       // builds libpdpf.a, pdpf_demo, pdpf_tests
+pdpf/                         # Core PDPF library
+  include/pdpf/               # public headers (prg, pprf, pdpf, group, ldc)
+  src/                        # implementations
+  tests/                      # pdpf_tests demo
+composite_fss/                # Composite FSS library
+  include/composite_fss/      # gates, SUF IR/packing, PDPF adapters, Beaver
+  src/                        # CPU + optional CUDA backend (pdpf_engine)
+  tests/                      # strict harness, packing/unit tests, softmax, etc.
+  bench/                      # bench_fss and helpers
+docs/                         # design notes
+bench.md                      # benchmark plan/results (Composite vs SHARK vs SIGMA)
+gpu.md                        # GPU offload plan and steps
+CompositeFSS.md               # protocol-level write-up
+Formalization&protrocol.md    # formal spec for composite gates
+COMPARISON_PLAN.md            # comparison methodology
 ```
 
-Key modules:
+Key headers to know:
+- `composite_fss/include/composite_fss/gates/*.hpp`: GeLU/SiLU, softmax, recip/rsqrt, norm, trunc, fused_layer.
+- `composite_fss/include/composite_fss/suf*.hpp`: SUF IR, channel registry, greedy packing, LUT compiler, unpack helpers.
+- `composite_fss/include/composite_fss/pdpf_adapter.hpp`: unified PdpfEngine interface with CPU backend and optional CUDA backend (see GPU section).
+- `composite_fss/include/composite_fss/beaver.hpp`: Beaver pools/counters.
+- `composite_fss/tests/strict_harness.hpp`: strict “no raw open” harness used by tests.
 
-- `core/`: seed/type definitions, CSPRNG wrapper, group arithmetic.
-- `prg/`: length-doubling PRG (`AesCtrPrg`, AES-CTR over 128-bit seed).
-- `pprf/`: GGM puncturable PRF with eval/eval_all/puncture/punc_eval.
-- `pdpf/`: small-domain binary PDPF, group PDPF wrapper, amplified PDPF.
-- `ldc/`: Reed–Muller LDC (Lemma 2 scaffold) for amplification.
-
-## Build
+## Building
 
 ```bash
-cmake -S . -B build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-Artifacts:
+Main artifacts:
+- `build/libpdpf.a`, `build/pdpf_demo`, `build/pdpf_tests`
+- `build/composite_fss_tests`, `build/composite_fss_no_raw_open`, `build/composite_fss_strict_spdz`
+- `build/bench_fss` (Composite-FSS benchmark harness)
 
-- `build/libpdpf.a` – static library
-- `build/pdpf_demo` – main.cpp demo (currently hello-world)
-- `build/pdpf_tests` – simple reconstruction demo
+### Optional CUDA backend
 
-Run the demo test:
+Enable CUDA (LUT eval offload) with:
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCOMPOSITE_FSS_CUDA=ON
+cmake --build build
+```
+At runtime set `COMPOSITE_FSS_USE_GPU=1` to route PdpfEngine through the CUDA backend (see `gpu.md` for design and steps). CPU remains the default if CUDA is off or the env var is unset.
+
+## Running tests
 
 ```bash
+# PDPF core
 ./build/pdpf_tests
+
+# Composite-FSS standard suite (includes GeLU/SiLU, softmax, recip/rsqrt, norm, trunc, packing)
+./build/composite_fss_tests
+
+# Strict “no raw open” enforcement
+./build/composite_fss_no_raw_open
+./build/composite_fss_strict_spdz
 ```
 
-## Module notes and status
+Softmax/recip tests guarded by env vars:
+```bash
+COMPOSITE_FSS_RUN_SOFTMAX_TESTS=1 COMPOSITE_FSS_RUN_RECIP_TESTS=1 ./build/composite_fss_tests
+```
 
-### PRG / RNG
-- `AesCtrPrg` implements G: {0,1}^128 → {0,1}^256 using AES-128-CTR via CommonCrypto.
-- `core::RandomDevice` uses `arc4random_buf`/`arc4random_uniform` for CSPRNG-quality bytes with rejection sampling.
+GPU path (if built with CUDA):
+```bash
+COMPOSITE_FSS_USE_GPU=1 ./build/composite_fss_tests
+```
 
-### PPRF (GGM)
-- Implements eval/eval_all/puncture/punc_eval over domain [M], outputs modulo N using the PRG to expand seeds.
-- Tree depth is ⌈log2 M⌉, 0-based domains.
+## Benchmarks
 
-### Small-domain PDPF (Theorem 4)
-- `pdpf_binary.*` implements Gen0/Gen1 and EvalAll0/1 with dummy bucket N (0-based domain, bucket N for β=0).
-- `M` chosen heuristically from N, ε via `choose_M`.
+`bench/bench_fss.cpp` emits CSV rows per gate:
+```
+gate,n_bits,f,dim,key_bytes,lut_bytes,triples,keygen_ms,online_ms
+```
 
-### Group PDPF (Theorem 5)
-- `pdpf_group.*` wraps multiple binary PDPFs to support finite Abelian groups G=Z_{q1}×…×Z_{qℓ} via bit decomposition of each coordinate.
-- Infinite components are not supported; payload bits are inferred from modulus bit-lengths.
+Examples:
+```bash
+./build/bench_fss 1000 4 4          # micro scale
+./build/bench_fss 10 128 768        # model-ish scale
+COMPOSITE_FSS_USE_GPU=1 ./build/bench_fss 1000 4 4   # GPU if enabled
+```
+See `bench.md` for the full comparison plan and recorded numbers vs SHARK/SIGMA.
 
-### Reed–Muller LDC (Lemma 2 scaffold)
-- `reed_muller_ldc.*` builds a prime field with |F| > r·σ+1, sets L=|F|^{w+1}, q=(σ+1)(rσ+1) (if unset), interpolates a degree≤r polynomial through N points (first N monomials/points), encodes C(z)(ρ,x)=ρ·P_z(x) mod p, and samples indices via random degree-σ curves with Lagrange coefficients and ρ-sharing.
-- This is structurally faithful but simplified: assumes invertible interpolation matrix, prime fields (no extensions), and does not strictly enforce N≤binom(r+w,r).
+## Feature highlights
 
-### Amplified PDPF (Theorem 6 scaffold)
-- `pdpf_amplified.*` uses the LDC to derive q inner PDPFs over Z_p (via PdpfGroup), aggregates EvalAll outputs mod p, and evaluates with an inner product against the LDC codeword.
-- Deterministic inner seeds derived from master seed; deltas from LDC sampling.
-- Security amplification parameters are not tuned for negligible error; use paper-consistent (p, r, σ, w) for stronger guarantees.
+- **Packed SUF→PDPF compilation**: all helper bits/indices for gates are packed into single multi-output PDPF programs; decoding via channel IDs (see `suf_packing.hpp`, `suf_unpack.hpp`).
+- **Fully masked nonlinear gates**: GeLU/SiLU, softmax, reciprocal/rsqrt, norm implemented with SUF LUTs + Beaver + truncation; strict “no open” discipline enforced by separate targets.
+- **Batching**: `eval_share_batch` across PdpfEngine backends; gates batch LUT evals for better CPU/GPU throughput.
+- **Bench harness**: measures LUT size, Beaver triples, keygen vs online time; CSV-friendly output for downstream analysis.
+- **GPU-ready**: optional CUDA backend for PdpfEngine LUT evaluation (see `gpu.md`); CPU/GPU selectable at runtime.
 
-## Caveats vs. the paper
-
-- LDC/amplification: simplified RM code, prime fields only; σ-wise independence and N≤binom(r+w,r) not enforced rigorously; no extension-field support.
-- Group decomposition: handles provided cyclic moduli; no prime-power factorization/CRT packing beyond bit layout; infinite components unsupported.
-- Domains are 0-based (paper uses 1-based); ensure consistent indexing in applications.
-- No side-channel hardening beyond using constant-time crypto libraries.
-- `main.cpp` is still the default hello-world; add PDPF demos as needed.
-
-## Suggested next steps
-
-1. **Paper-faithful LDC/amplification:** implement full Reed–Muller code per Lemma 2 (extension field if needed), enforce parameter constraints, and tune r, σ, w, p for negligible error per Theorem 6.
-2. **Group decomposition:** add prime-power factorization and CRT-based encoding for arbitrary finite Abelian groups and subsets G′.
-3. **Demos/tests:** extend `pdpf_demo` and `pdpf_tests` with PPRF, binary PDPF, group PDPF, and amplified PDPF correctness tests.
-4. **Platform crypto:** if not on macOS/CommonCrypto, swap AES-CTR and CSPRNG to an available constant-time library (OpenSSL/libsodium/BoringSSL).
-
-## Quick usage sketch (binary PDPF)
+## Quick PDPF usage (binary)
 
 ```cpp
 #include "pdpf/prg/prg.hpp"
@@ -89,10 +110,8 @@ Run the demo test:
 using namespace pdpf;
 
 core::Seed master{};
-core::RandomDevice rng;
-rng.random_seed(master);
+core::RandomDevice rng; rng.random_seed(master);
 auto prg = std::make_shared<prg::AesCtrPrg>(master);
-
 pdpf::PdpfBinary pdpf_bin(prg);
 core::SecurityParams sec{128, 16, 0.25};
 
@@ -106,3 +125,18 @@ pdpf_bin.eval_all_online(k1, Y1);
 // Reconstruct: Y0[x] + Y1[x]
 ```
 
+For Composite-FSS gate examples, see `composite_fss/tests/test_composite_fss.cpp` and the strict harness in `tests/strict_harness.hpp`.
+
+## Theoretical backdrop (academic program)
+
+This code tracks the constructions formalized in the accompanying notes:
+
+- **Small-domain PDPF** (Boyle–Gilboa–Ishai–Kolobov, 2023): Gen/Eval for binary PDPF with correctness and privacy over domains [M] (Theorem 4), plus amplification via Reed–Muller LDC (Lemma 2 scaffold → Theorem 6). Group PDPF follows Theorem 5 by decomposing into cyclic factors.
+- **SUF IR and compilation**: SUF descriptors encode piecewise polynomial + Boolean expressions with masks `(r_in, r_out)`; compiled to multi-output PDPF programs with packed channels. See `Formalization&protrocol.md` for the SUF semantics and the Composite-FSS definition.
+- **Composite-FSS gates**: GeLU/SiLU, softmax, reciprocal/rsqrt, truncation/ARS/DReLU are expressed as SUF programs plus linear/Beaver steps, matching the formal protocol in `CompositeFSS.md` (§2–4). Security follows the standard FSS + SPDZ hybrid: no raw opens in online paths, Beaver triples for multiplications, masks for public indices only.
+- **Batching & GPU**: PDPF evaluation is embarrassingly parallel; the batching API and optional CUDA backend implement the same semantics as the CPU PdpfEngine, preserving the security model.
+
+For precise definitions, notation, and proofs, consult:
+- `Formalization&protrocol.md` — SUF, PDPF, masking, and Composite gate semantics.
+- `CompositeFSS.md` — end-to-end protocol, gate definitions, and security intuition.
+- `COMPARISON_PLAN.md` and `bench.md` — how we map theory to empirical comparisons.

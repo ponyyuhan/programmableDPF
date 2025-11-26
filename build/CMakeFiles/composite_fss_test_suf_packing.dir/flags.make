@@ -6,7 +6,5 @@ CXX_DEFINES = -DCOMPOSITE_FSS_INTERNAL=1
 
 CXX_INCLUDES = -I/Users/yuhan/Desktop/workspace/PDPF/composite_fss/include -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1
 
-CXX_FLAGSx86_64 = -std=gnu++20 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
-
-CXX_FLAGS = -std=gnu++20 -arch x86_64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+CXX_FLAGS = -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
