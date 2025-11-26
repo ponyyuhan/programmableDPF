@@ -26,8 +26,9 @@ struct SoftmaxKey {
     unsigned trunc_shift = 0;
     // One DReLU per comparison step in the linear scan.
     std::vector<DreluKey> drelu_keys;
-    // One nExp key per element.
-    std::vector<NExpGateKey> nexp_keys;
+    // Shared nExp kernel + per-element masks.
+    NExpKernel nexp_kernel;
+    std::vector<NExpInstanceKey> nexp_instances;
     // One Inv key for the denominator.
     InvGateKey inv_key;
     // Truncation for normalization.
@@ -51,22 +52,25 @@ inline SoftmaxKeyPair softmax_keygen(const SoftmaxParams &params,
     kp.k0.trunc_shift = kp.k1.trunc_shift = trunc_shift;
 
     // DReLU masks for k-1 comparisons.
-    kp.k0.drelu_keys.resize(params.vec_len - 1);
-    kp.k1.drelu_keys.resize(params.vec_len - 1);
-    for (std::size_t i = 0; i + 1 < params.vec_len; ++i) {
+    std::size_t cmp_count = (params.vec_len > 0) ? (params.vec_len - 1) : 0;
+    kp.k0.drelu_keys.resize(cmp_count);
+    kp.k1.drelu_keys.resize(cmp_count);
+    if (cmp_count > 0) {
         auto dkeys = drelu_gen(params.n_bits, engine, rng);
-        kp.k0.drelu_keys[i] = dkeys.k0;
-        kp.k1.drelu_keys[i] = dkeys.k1;
+        kp.k0.drelu_keys.assign(cmp_count, dkeys.k0);
+        kp.k1.drelu_keys.assign(cmp_count, dkeys.k1);
     }
 
-    // nExp per element.
-    kp.k0.nexp_keys.resize(params.vec_len);
-    kp.k1.nexp_keys.resize(params.vec_len);
+    // Shared nExp kernel with per-element masks.
     NExpGateParams np{params.n_bits, params.f};
+    kp.k0.nexp_kernel = gen_nexp_kernel(np, engine);
+    kp.k1.nexp_kernel = kp.k0.nexp_kernel;
+    kp.k0.nexp_instances.resize(params.vec_len);
+    kp.k1.nexp_instances.resize(params.vec_len);
     for (std::size_t i = 0; i < params.vec_len; ++i) {
-        auto nkeys = gen_nexp_gate(np, engine, rng);
-        kp.k0.nexp_keys[i] = nkeys.k0;
-        kp.k1.nexp_keys[i] = nkeys.k1;
+        auto inst_pair = gen_nexp_instance(params.n_bits, rng);
+        kp.k0.nexp_instances[i] = inst_pair.k0;
+        kp.k1.nexp_instances[i] = inst_pair.k1;
     }
 
     // Single Inv key for the denominator.
@@ -106,6 +110,7 @@ softmax_eval_pair(PdpfEngine &engine,
     SoftmaxEvalShare out0, out1;
     out0.y.resize(k);
     out1.y.resize(k);
+    if (k == 0) return {out0, out1};
 
     // Start from secret shares of logits.
     std::vector<Share> cur0(k), cur1(k);
@@ -142,14 +147,13 @@ softmax_eval_pair(PdpfEngine &engine,
         z1[i] = sub(cfg, x_max1, cur1[i]);
     }
 
-    // exp_i = exp(-(x_i - x_max)) using masked nExp (per element).
-    std::vector<Share> exp0(k), exp1(k);
-    for (std::size_t i = 0; i < k; ++i) {
-        auto [e0, e1] = nexpgate_eval_from_share_pair(cfg, k0.nexp_keys[i], k1.nexp_keys[i],
-                                                      z0[i], z1[i], engine);
-        exp0[i] = e0;
-        exp1[i] = e1;
-    }
+    // exp_i = exp(-(x_i - x_max)) using shared kernel + per-element masks (batched).
+    auto exp_pair = nexpgate_eval_batch_from_instances(cfg, k0.nexp_kernel,
+                                                       k0.nexp_instances,
+                                                       k1.nexp_instances,
+                                                       z0, z1, engine);
+    std::vector<Share> exp0 = std::move(exp_pair.first);
+    std::vector<Share> exp1 = std::move(exp_pair.second);
 
     // denom = sum exp_i (shares)
     Share denom0 = exp0[0];

@@ -21,7 +21,8 @@ struct NormParams {
 
 struct NormKey {
     NormParams params;
-    RecipKey inv_dim_key;    // 1 / dim in Q_f
+    // 1/dim in Q_f as a public constant (stored in ring encoding).
+    std::uint64_t inv_dim_fp = 0;
     RecipKey inv_sqrt_key;   // 1 / sqrt(var) in Q_f (expects input in Q_{2f})
     LRSKey trunc_f;          // shift by f to drop one fixed-point scale
 };
@@ -36,12 +37,14 @@ inline NormKeyPair norm_keygen(const NormParams &p,
                                std::mt19937_64 &rng) {
     NormKeyPair kp;
     kp.k0.params = kp.k1.params = p;
+    RingConfig cfg = make_ring_config(p.n_bits);
 
-    // Recip for 1/dim (input is integer, output Q_f).
-    RecipParams rp_dim{p.n_bits, 0, p.f,
-                       static_cast<unsigned>(p.dim > 0 ? p.dim : 1),
-                       false};
-    auto dim_keys = gen_recip_gate(rp_dim, engine, rng);
+    // Precompute 1/dim as a public fixed-point constant in Q_f.
+    double inv_dim_real = 1.0 / std::max<std::size_t>(p.dim, 1);
+    std::int64_t inv_dim_fp_signed =
+        static_cast<std::int64_t>(std::llround(inv_dim_real * (1ULL << p.f)));
+    std::uint64_t inv_dim_fp = static_cast<std::uint64_t>(inv_dim_fp_signed) & cfg.modulus_mask;
+    kp.k0.inv_dim_fp = kp.k1.inv_dim_fp = inv_dim_fp;
 
     // Recip for 1/sqrt(var). Input variance is roughly Q_{2f}, but cap to keep LUT small.
     unsigned f_in_var = static_cast<unsigned>(std::min<std::size_t>(p.f * 2, (p.n_bits > 3 ? p.n_bits - 3 : p.n_bits)));
@@ -53,8 +56,6 @@ inline NormKeyPair norm_keygen(const NormParams &p,
     MPCContext dealer_ctx(p.n_bits, rng());
     auto trunc_pair = lrs_gen(p.n_bits, p.f, engine, dealer_ctx);
 
-    kp.k0.inv_dim_key = dim_keys.k0;
-    kp.k1.inv_dim_key = dim_keys.k1;
     kp.k0.inv_sqrt_key = var_keys.k0;
     kp.k1.inv_sqrt_key = var_keys.k1;
     kp.k0.trunc_f = trunc_pair.k0;
@@ -86,19 +87,14 @@ norm_eval_pair(const NormKeyPair &keys,
         sum1 = add(cfg, sum1, x1[i]);
     }
 
-    // inv_dim in Q_f.
-    auto inv_dim_pair = recip_eval_from_share_pair(cfg, k0.inv_dim_key, k1.inv_dim_key,
-                                                   sum0, sum1, engine, pool0, pool1);
-
     // mean = sum * inv_dim (Q_f); shift down by f to return to Q_f.
     Share mean0 = constant(cfg, 0, 0);
     Share mean1 = constant(cfg, 0, 1);
     if (!k0.params.rms) {
-        auto mean_prod = beaver_mul_pair_from_pools(cfg, pool0, pool1,
-                                                    sum0, sum1,
-                                                    inv_dim_pair.first, inv_dim_pair.second);
+        auto mean_scaled0 = mul_const(cfg, sum0, k0.inv_dim_fp);
+        auto mean_scaled1 = mul_const(cfg, sum1, k0.inv_dim_fp);
         auto mean_trunc = lrs_eval_from_share_pair(cfg, k0.trunc_f, k1.trunc_f,
-                                                   mean_prod.first, mean_prod.second, engine);
+                                                   mean_scaled0, mean_scaled1, engine);
         mean0 = mean_trunc.first;
         mean1 = mean_trunc.second;
     }
@@ -115,11 +111,10 @@ norm_eval_pair(const NormKeyPair &keys,
     }
 
     // Average variance: (sum squares / dim).
-    auto var_scaled = beaver_mul_pair_from_pools(cfg, pool0, pool1,
-                                                 var0, var1,
-                                                 inv_dim_pair.first, inv_dim_pair.second);
+    auto var_scaled0 = mul_const(cfg, var0, k0.inv_dim_fp);
+    auto var_scaled1 = mul_const(cfg, var1, k0.inv_dim_fp);
     auto var_avg = lrs_eval_from_share_pair(cfg, k0.trunc_f, k1.trunc_f,
-                                            var_scaled.first, var_scaled.second, engine);
+                                            var_scaled0, var_scaled1, engine);
 
     // Add epsilon in Q_{2f} (var_avg currently Q_{2f}).
     if (k0.params.eps > 0.0) {

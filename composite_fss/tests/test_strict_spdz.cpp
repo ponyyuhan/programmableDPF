@@ -141,7 +141,11 @@ int main() {
                 for (std::size_t j = 0; j < sp.vec_len; ++j) {
                     z0[j] = sub(h.cfg, max0, cur0[j]);
                     z1[j] = sub(h.cfg, max1, cur1[j]);
-                    auto e = nexpgate_eval_from_share_pair(h.cfg, keys.k0.nexp_keys[j], keys.k1.nexp_keys[j], z0[j], z1[j], h.engine);
+                    auto e = nexpgate_eval_from_instance_pair(h.cfg,
+                                                              keys.k0.nexp_kernel,
+                                                              keys.k0.nexp_instances[j],
+                                                              keys.k1.nexp_instances[j],
+                                                              z0[j], z1[j], h.engine);
                     exp0[j] = e.first;
                     exp1[j] = e.second;
                 }

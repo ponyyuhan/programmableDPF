@@ -80,6 +80,11 @@ public:
         return make_lut_program(lut_desc, table_flat);
     }
 
+    std::size_t program_bytes(PdpfProgramId program) const {
+        if (program >= programs_.size()) return 0;
+        return programs_[program].table.size() * sizeof(std::uint64_t);
+    }
+
     void eval_share(PdpfProgramId program,
                     int party,
                     std::uint64_t x,

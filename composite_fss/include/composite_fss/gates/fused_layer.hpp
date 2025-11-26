@@ -54,17 +54,11 @@ inline FusedLayerKeyPair fused_layer_keygen(const FusedLayerParams &p,
         ap.f = p.f_act;
         ap.lut_bits = 8;
         ap.clip = 3.0;
-        pair.k0.act_keys0.resize(p.out_dim);
-        pair.k0.act_keys1.resize(p.out_dim);
-        pair.k1.act_keys0.resize(p.out_dim);
-        pair.k1.act_keys1.resize(p.out_dim);
-        for (std::size_t i = 0; i < p.out_dim; ++i) {
-            auto akp = activation_gen(ap, engine, dealer_ctx);
-            pair.k0.act_keys0[i] = akp.k0;
-            pair.k0.act_keys1[i] = akp.k1;
-            pair.k1.act_keys0[i] = akp.k0;
-            pair.k1.act_keys1[i] = akp.k1;
-        }
+        auto akp = activation_gen(ap, engine, dealer_ctx);
+        pair.k0.act_keys0.assign(p.out_dim, akp.k0);
+        pair.k0.act_keys1.assign(p.out_dim, akp.k1);
+        pair.k1.act_keys0.assign(p.out_dim, akp.k0);
+        pair.k1.act_keys1.assign(p.out_dim, akp.k1);
     }
     return pair;
 }
@@ -119,4 +113,3 @@ fused_layer_eval_pair(const FusedLayerKeyPair &keys,
 }
 
 } // namespace cfss
-

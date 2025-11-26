@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <unordered_map>
 
 namespace cfss {
 
@@ -23,14 +24,21 @@ struct SufPackedLayout {
     uint32_t word_bitwidth = 64;
     uint32_t num_words = 0;
     std::vector<SufPackedField> fields;
+    std::unordered_map<std::uint64_t, std::size_t> field_index;
+
+    void build_index() {
+        field_index.clear();
+        for (std::size_t i = 0; i < fields.size(); ++i) {
+            const auto &f = fields[i];
+            std::uint64_t key = (static_cast<std::uint64_t>(f.logical.channel.id) << 32) | f.logical.element_index;
+            field_index[key] = i;
+        }
+    }
 
     const SufPackedField *find_field(SufChannelId ch, uint32_t elem_idx) const {
-        for (const auto &f : fields) {
-            if (f.logical.channel == ch && f.logical.element_index == elem_idx) {
-                return &f;
-            }
-        }
-        return nullptr;
+        std::uint64_t key = (static_cast<std::uint64_t>(ch.id) << 32) | elem_idx;
+        auto it = field_index.find(key);
+        return it == field_index.end() ? nullptr : &fields[it->second];
     }
 };
 
@@ -76,6 +84,7 @@ inline SufPackedLayout make_greedy_packed_layout(const SufChannelRegistry &reg,
         bit_used += f.width_bits;
     }
     layout.num_words = word_idx + (layout.fields.empty() ? 0 : 1);
+    layout.build_index();
     return layout;
 }
 

@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <unordered_set>
 
 using namespace cfss;
 
@@ -53,6 +54,20 @@ void print_row(const BenchResult &r) {
               << r.online_ms << "\n";
 }
 
+std::size_t sum_program_bytes(const PdpfEngine &eng,
+                              const std::vector<PdpfProgramId> &pids) {
+    const auto *adapter = dynamic_cast<const PdpfEngineAdapter *>(&eng);
+    if (!adapter) return 0;
+    std::unordered_set<PdpfProgramId> uniq;
+    std::size_t total = 0;
+    for (auto pid : pids) {
+        if (uniq.insert(pid).second) {
+            total += adapter->program_bytes(pid);
+        }
+    }
+    return total;
+}
+
 BenchResult bench_gelu(unsigned n_bits, unsigned f, unsigned iters) {
     BenchResult r;
     r.gate = "gelu";
@@ -70,6 +85,7 @@ BenchResult bench_gelu(unsigned n_bits, unsigned f, unsigned iters) {
     auto t1 = std::chrono::steady_clock::now();
     r.keygen_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
     r.lut_bytes_total = lut_bytes(engine, keys.k0.main_prog.compiled.pdpf_program);
+    r.key_bytes = sum_program_bytes(engine, {keys.k0.main_prog.compiled.pdpf_program});
 
     RingConfig cfg = make_ring_config(n_bits);
     std::mt19937_64 rng(0xF00D);
@@ -106,8 +122,16 @@ BenchResult bench_softmax(unsigned n_bits, unsigned f, std::size_t vec_len, unsi
     auto t1 = std::chrono::steady_clock::now();
     r.keygen_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
     r.lut_bytes_total = lut_bytes(engine, keys.k0.inv_key.prog);
-    for (const auto &k : keys.k0.nexp_keys) r.lut_bytes_total += lut_bytes(engine, k.prog);
+    r.key_bytes = sum_program_bytes(engine, {keys.k0.inv_key.prog});
+    r.lut_bytes_total += lut_bytes(engine, keys.k0.nexp_kernel.prog);
+    r.lut_bytes_total += lut_bytes(engine, keys.k0.trunc_key.compiled.pdpf_program);
     for (const auto &k : keys.k0.drelu_keys) r.lut_bytes_total += lut_bytes(engine, k.compiled.pdpf_program);
+    std::vector<PdpfProgramId> pids;
+    pids.push_back(keys.k0.inv_key.prog);
+    pids.push_back(keys.k0.nexp_kernel.prog);
+    pids.push_back(keys.k0.trunc_key.compiled.pdpf_program);
+    for (const auto &k : keys.k0.drelu_keys) pids.push_back(k.compiled.pdpf_program);
+    r.key_bytes = sum_program_bytes(engine, pids);
 
     RingConfig cfg = make_ring_config(n_bits);
     std::uniform_int_distribution<int> dist(-3, 3);
@@ -185,8 +209,11 @@ BenchResult bench_norm(unsigned n_bits, unsigned f, std::size_t dim, unsigned it
     auto keys = norm_keygen(np, engine, rng);
     auto t1 = std::chrono::steady_clock::now();
     r.keygen_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
-    r.lut_bytes_total = lut_bytes(engine, keys.k0.inv_dim_key.inv_key.prog) +
-                        lut_bytes(engine, keys.k0.inv_sqrt_key.inv_key.prog);
+    r.lut_bytes_total = lut_bytes(engine, keys.k0.inv_sqrt_key.inv_key.prog);
+    r.lut_bytes_total += lut_bytes(engine, keys.k0.trunc_f.compiled.pdpf_program);
+    r.key_bytes = sum_program_bytes(engine,
+                                    {keys.k0.inv_sqrt_key.inv_key.prog,
+                                     keys.k0.trunc_f.compiled.pdpf_program});
 
     RingConfig cfg = make_ring_config(n_bits);
     BeaverPool pool0(cfg, 0xFACE, 0);

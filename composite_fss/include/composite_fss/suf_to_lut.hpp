@@ -72,6 +72,7 @@ inline PackedSufProgram compile_suf_desc_packed(const SufDesc &desc,
     }
     layout.num_words = static_cast<uint32_t>(layout.fields.size());
 #endif
+    layout.build_index();
 
     if (desc.shape.domain_bits == 0) throw std::runtime_error("SufDesc: n_bits must be > 0");
     std::size_t domain_size = 1ULL << desc.shape.domain_bits;
