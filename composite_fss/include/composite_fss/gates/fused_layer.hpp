@@ -34,6 +34,30 @@ struct FusedLayerKeyPair {
     FusedLayerKey k1;
 };
 
+inline std::pair<Share, Share> fused_trunc_activation_eval(const RingConfig &cfg,
+                                                           const LRSKey &t0,
+                                                           const LRSKey &t1,
+                                                           const ActivationKey *a0,
+                                                           const ActivationKey *a1,
+                                                           BeaverPool &pool0,
+                                                           BeaverPool &pool1,
+                                                           const Share &x0,
+                                                           const Share &x1,
+                                                           PdpfEngine &engine) {
+    auto trunc_pair = lrs_eval_from_share_pair(cfg, t0, t1, x0, x1, engine);
+    if (a0 == nullptr || a1 == nullptr) {
+        return trunc_pair;
+    }
+    std::uint64_t x_hat = ring_add(cfg,
+                                   ring_add(cfg, share_value(trunc_pair.first), share_value(trunc_pair.second)),
+                                   a0->r_in);
+    auto eval0 = activation_eval_main(0, *a0, x_hat, engine);
+    auto eval1 = activation_eval_main(1, *a1, x_hat, engine);
+    Share y0 = activation_finish(cfg, *a0, eval0, pool0);
+    Share y1 = activation_finish(cfg, *a1, eval1, pool1);
+    return {y0, y1};
+}
+
 inline FusedLayerKeyPair fused_layer_keygen(const FusedLayerParams &p,
                                             PdpfEngine &engine,
                                             std::mt19937_64 &rng) {
@@ -93,21 +117,15 @@ fused_layer_eval_pair(const FusedLayerKeyPair &keys,
             acc0 = add(cfg, acc0, prod.first);
             acc1 = add(cfg, acc1, prod.second);
         }
-        auto trunc_pair = lrs_eval_from_share_pair(cfg, k0.trunc_key, k1.trunc_key, acc0, acc1, engine);
-        Share act0 = trunc_pair.first;
-        Share act1 = trunc_pair.second;
-
-        if (k0.params.act != FusedActivationKind::None && o < k0.act_keys0.size()) {
-            auto a0 = activation_eval_main(0, k0.act_keys0[o], ring_add(cfg, ring_add(cfg, share_value(act0), share_value(act1)), k0.act_keys0[o].r_in), engine);
-            auto a1 = activation_eval_main(1, k1.act_keys1[o], ring_add(cfg, ring_add(cfg, share_value(act0), share_value(act1)), k1.act_keys1[o].r_in), engine);
-            auto out_pair = activation_finish(cfg, k0.act_keys0[o], a0, pool0);
-            auto out_pair_b = activation_finish(cfg, k1.act_keys1[o], a1, pool1);
-            y0[o] = out_pair;
-            y1[o] = out_pair_b;
-        } else {
-            y0[o] = act0;
-            y1[o] = act1;
-        }
+        const ActivationKey *a0 = (k0.params.act != FusedActivationKind::None && o < k0.act_keys0.size())
+                                      ? &k0.act_keys0[o]
+                                      : nullptr;
+        const ActivationKey *a1 = (k1.params.act != FusedActivationKind::None && o < k1.act_keys1.size())
+                                      ? &k1.act_keys1[o]
+                                      : nullptr;
+        auto out_pair = fused_trunc_activation_eval(cfg, k0.trunc_key, k1.trunc_key, a0, a1, pool0, pool1, acc0, acc1, engine);
+        y0[o] = out_pair.first;
+        y1[o] = out_pair.second;
     }
     return {y0, y1};
 }

@@ -960,17 +960,18 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/pdpf.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/gez.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../pdpf.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../ring.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../sharing.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../arith.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/relu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/trunc.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_packing.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_unpack.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_to_lut.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_eval.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/gelu.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../wire.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/nexp.hpp \
@@ -1013,13 +1014,19 @@ CMakeFiles/composite_fss_tests.dir/composite_fss/tests/test_composite_fss.cpp.o:
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/unistd.h \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/drelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax_block.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/global_helper.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/recip.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/./gez.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/./trunc.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/recsqrt.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/fused_layer.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../gates/gelu.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../gates/trunc.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/wire.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_eval.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_batched.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_to_lut.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_packing.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/suf_unpack.hpp \

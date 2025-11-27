@@ -1001,10 +1001,6 @@ CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cp
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../sharing.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../beaver.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_packing.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_to_lut.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_eval.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_unpack.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/softmax.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../wire.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/nexp.hpp \
@@ -1012,6 +1008,10 @@ CMakeFiles/composite_fss_strict_spdz.dir/composite_fss/tests/test_strict_spdz.cp
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/inv.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/drelu.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/trunc.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_packing.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_unpack.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_to_lut.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../suf_eval.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/relu.hpp \
-  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/gez.hpp \
+  /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/gates/../ring.hpp \
   /Users/yuhan/Desktop/workspace/PDPF/composite_fss/tests/../include/composite_fss/wire.hpp

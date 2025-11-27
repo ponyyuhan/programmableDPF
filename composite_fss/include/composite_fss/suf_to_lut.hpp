@@ -17,6 +17,9 @@ inline MultiLut compile_suf_to_lut_multi(const StackedSuf &stacked) {
     if (stacked.shape.domain_bits == 0) {
         throw std::runtime_error("compile_suf_to_lut_multi: empty shape");
     }
+    if (stacked.shape.domain_bits >= 63) {
+        throw std::runtime_error("compile_suf_to_lut_multi: domain_bits must be < 63 for LUT backend");
+    }
     std::size_t domain_size = 1ULL << stacked.shape.domain_bits;
     MultiLut out;
     out.desc.domain_bits = stacked.shape.domain_bits;
@@ -75,6 +78,7 @@ inline PackedSufProgram compile_suf_desc_packed(const SufDesc &desc,
     layout.build_index();
 
     if (desc.shape.domain_bits == 0) throw std::runtime_error("SufDesc: n_bits must be > 0");
+    if (desc.shape.domain_bits >= 63) throw std::runtime_error("SufDesc: LUT backend supports domain_bits < 63");
     std::size_t domain_size = 1ULL << desc.shape.domain_bits;
     std::vector<std::uint64_t> table_flat(domain_size * layout.num_words, 0);
     std::uint64_t mask = (desc.shape.domain_bits == 64) ? ~0ULL : ((1ULL << desc.shape.domain_bits) - 1ULL);
@@ -103,13 +107,13 @@ inline PackedSufProgram compile_suf_desc_packed(const SufDesc &desc,
             val = ring_add(cfg, val, desc.r_out & mask);
             arith_vals[r] = val;
         }
-        std::uint64_t bool_bits = 0;
-        if (desc.l_outputs > 0 && interval_idx < desc.bools.size()) {
-            for (unsigned b = 0; b < desc.l_outputs && b < desc.bools[interval_idx].size(); ++b) {
-                bool bit = eval_bool_expr(desc.bools[interval_idx][b], unmasked);
-                bool_bits |= (static_cast<std::uint64_t>(bit) << b);
-            }
-        }
+                std::uint64_t bool_bits = 0;
+                if (desc.l_outputs > 0 && interval_idx < desc.bools.size()) {
+                    for (unsigned b = 0; b < desc.l_outputs && b < desc.bools[interval_idx].size(); ++b) {
+                        bool bit = eval_bool_expr(desc.bools[interval_idx][b], unmasked, desc.shape.domain_bits);
+                        bool_bits |= (static_cast<std::uint64_t>(bit) << b);
+                    }
+                }
 
         std::vector<std::uint64_t> words(layout.num_words, 0);
         for (const auto &f : layout.fields) {
@@ -144,6 +148,8 @@ inline PackedSufProgram compile_suf_desc_packed(const SufDesc &desc,
     compiled.num_arith_outputs = desc.r_outputs;
     compiled.num_bool_outputs = desc.l_outputs;
     compiled.output_words = layout.num_words;
+    compiled.arith_words = desc.r_outputs;
+    compiled.bool_words = (desc.l_outputs + 63) / 64;
     compiled.shape = desc.shape;
 
     PackedSufProgram out;

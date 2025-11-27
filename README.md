@@ -97,7 +97,9 @@ See `bench.md` for the full comparison plan and recorded numbers vs SHARK/SIGMA.
 ## Feature highlights
 
 - **Packed SUF→PDPF compilation**: all helper bits/indices for gates are packed into single multi-output PDPF programs; decoding via channel IDs (see `suf_packing.hpp`, `suf_unpack.hpp`).
+- **Global helper + batching**: `global_helper.hpp` builds a shared helper-bit layout across gates/layers, and `suf_batched.hpp` wraps naive per-instance SUF keys so you can drive whole layers from one descriptor before moving to a shared tree.
 - **Fully masked nonlinear gates**: GeLU/SiLU, softmax, reciprocal/rsqrt, norm implemented with SUF LUTs + Beaver + truncation; strict “no open” discipline enforced by separate targets.
+- **Fused trunc+activation**: `gates/fused_layer.hpp` exposes a fused TR+Act helper that keeps truncation and activation in one composite step over SPDZ matmul outputs.
 - **Batching**: `eval_share_batch` across PdpfEngine backends; gates batch LUT evals for better CPU/GPU throughput.
 - **Bench harness**: measures LUT size, Beaver triples, keygen vs online time; CSV-friendly output for downstream analysis.
 - **GPU-ready**: optional CUDA backend for PdpfEngine LUT evaluation (see `gpu.md`); CPU/GPU selectable at runtime.

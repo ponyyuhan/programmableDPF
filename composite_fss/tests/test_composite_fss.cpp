@@ -7,13 +7,16 @@
 #include "../include/composite_fss/gates/gelu.hpp"
 #include "../include/composite_fss/gates/softmax.hpp"
 #include "../include/composite_fss/gates/softmax_block.hpp"
+#include "../include/composite_fss/global_helper.hpp"
 #include "../include/composite_fss/beaver.hpp"
 #include "../include/composite_fss/gates/nexp.hpp"
 #include "../include/composite_fss/gates/inv.hpp"
 #include "../include/composite_fss/gates/recip.hpp"
 #include "../include/composite_fss/gates/recsqrt.hpp"
+#include "../include/composite_fss/gates/fused_layer.hpp"
 #include "../include/composite_fss/wire.hpp"
 #include "../include/composite_fss/suf_eval.hpp"
+#include "../include/composite_fss/suf_batched.hpp"
 #include "../include/composite_fss/suf_to_lut.hpp"
 #include "../include/composite_fss/suf_packing.hpp"
 #include "../include/composite_fss/suf_unpack.hpp"
@@ -81,9 +84,9 @@ int main() {
             u64 x_hat = ring.add(x_ring, keys.k0.r_in);
             MPCContext ctx0(N_BITS, 0xAAC000 + i);
             MPCContext ctx1(N_BITS, 0xBBC000 + i);
-            Share y0 = relu_eval(0, keys.k0, x_hat, engine, ctx0);
-            Share y1 = relu_eval(1, keys.k1, x_hat, engine, ctx1);
-            u64 y_hat = reconstruct(y0, y1);
+            auto y0_out = relu_eval(0, keys.k0, x_hat, engine, ctx0);
+            auto y1_out = relu_eval(1, keys.k1, x_hat, engine, ctx1);
+            u64 y_hat = reconstruct(y0_out.y, y1_out.y);
             u64 y = ring.sub(y_hat, keys.k0.r_out);
             std::int64_t exp = std::max<std::int64_t>(xs, 0);
             if (ring.to_signed(y) != exp) {
@@ -94,9 +97,9 @@ int main() {
                           << " y_hat=" << ring.to_signed(y)
                           << " exp=" << exp
 #if COMPOSITE_FSS_INTERNAL
-                          << " share0=" << y0.raw_value_unsafe()
-                          << " share1=" << y1.raw_value_unsafe()
-                          << " recon_raw=" << reconstruct(y0, y1)
+                          << " share0=" << y0_out.y.raw_value_unsafe()
+                          << " share1=" << y1_out.y.raw_value_unsafe()
+                          << " recon_raw=" << reconstruct(y0_out.y, y1_out.y)
 #endif
                           << std::endl;
                 break;
@@ -490,6 +493,149 @@ int main() {
             }
         }
         std::cout << "SUF stacked vector LUT test: " << (ok ? "ok" : "FAIL") << std::endl;
+        assert(ok);
+    }
+
+    // === Global helper-bit PDPF (naive embed) ===
+    {
+        GlobalHelperSchema schema;
+        schema.add_kind(HelperKind::Neg);
+        SufDesc helper;
+        helper.shape.domain_bits = 8;
+        helper.shape.num_words = 1;
+        helper.r_outputs = 0;
+        helper.l_outputs = 1;
+        helper.alpha = {0, 1ULL << helper.shape.domain_bits};
+        BoolExpr lt_half;
+        lt_half.kind = BoolExpr::LT_CONST;
+        lt_half.param = 1ULL << (helper.shape.domain_bits - 1);
+        helper.bools = {std::vector<BoolExpr>{lt_half}};
+        helper.r_in = rng() & ((1ULL << helper.shape.domain_bits) - 1);
+
+        GateHelperInput input;
+        input.gate_index = 0;
+        input.bool_suf = helper;
+        input.bit_mapping.push_back({0, HelperKind::Neg});
+
+        PdpfEngineAdapter eng_help(helper.shape.domain_bits, 0xCCDD, select_backend_from_env());
+        auto gkey = make_global_helper_key(schema, {input}, eng_help);
+        Ring64 ring8(helper.shape.domain_bits);
+        bool ok = true;
+        for (int i = 0; i < 40; ++i) {
+            u64 x = rng() & ((1ULL << helper.shape.domain_bits) - 1);
+            u64 x_hat = ring8.add(x, helper.r_in);
+            std::vector<std::uint64_t> o0, o1;
+            global_helper_eval(gkey, 0, 0, x_hat, eng_help, o0);
+            global_helper_eval(gkey, 1, 0, x_hat, eng_help, o1);
+            if (o0.empty() || o1.empty()) {
+                ok = false;
+                break;
+            }
+            u64 recon = ring8.add(o0[0], o1[0]);
+            auto offset = schema.lookup_offset(HelperKind::Neg);
+            if (!offset.has_value()) {
+                ok = false;
+                break;
+            }
+            u64 bit = (recon >> *offset) & 1ULL;
+            u64 exp = (x < lt_half.param) ? 1ULL : 0ULL;
+            if (bit != exp) {
+                ok = false;
+                break;
+            }
+        }
+        std::cout << "Global helper PDPF test: " << (ok ? "ok" : "FAIL") << std::endl;
+        assert(ok);
+    }
+
+    // === Batched SUF wrapper (naive pack) ===
+    {
+        unsigned nbits = 8;
+        std::size_t dom = 1ULL << nbits;
+        std::vector<u64> table(dom);
+        for (std::size_t x = 0; x < dom; ++x) table[x] = x;
+        BatchedSufDesc bdesc;
+        bdesc.scalar_suf = table_to_suf(nbits, 1, table);
+        bdesc.r_in = {rng() & ((1ULL << nbits) - 1), rng() & ((1ULL << nbits) - 1)};
+        bdesc.r_out = {0, 0};
+        PdpfEngineAdapter eng_b(nbits, 0xEEEE, select_backend_from_env());
+        auto bkey = suf2pdpf_batched(bdesc, eng_b);
+        Ring64 ringb(nbits);
+        bool ok = true;
+        for (int t = 0; t < 20; ++t) {
+            for (std::size_t idx = 0; idx < bdesc.r_in.size(); ++idx) {
+                u64 x = rng() & ((1ULL << nbits) - 1);
+                u64 x_hat = ringb.add(x, bdesc.r_in[idx]);
+                std::vector<std::uint64_t> o0, o1;
+                batched_eval_share(bkey, 0, idx, x_hat, eng_b, o0);
+                batched_eval_share(bkey, 1, idx, x_hat, eng_b, o1);
+                if (o0.empty() || o1.empty()) {
+                    ok = false;
+                    break;
+                }
+                u64 recon = ringb.add(o0[0], o1[0]);
+                if (recon != x) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (!ok) break;
+        }
+        std::cout << "Batched SUF wrapper test: " << (ok ? "ok" : "FAIL") << std::endl;
+        assert(ok);
+    }
+
+    // === Fused trunc+activation helper ===
+    {
+        unsigned nbits = 16;
+        Ring64 ringf(nbits);
+        RingConfig cfg_f = make_ring_config(nbits);
+        MPCContext dealer_f(nbits, 0xCAFEBABE);
+        PdpfEngineAdapter eng_f(nbits, 0xD1D2, select_backend_from_env());
+        auto trunc_pair = lrs_gen(nbits, 4, eng_f, dealer_f);
+        ActivationParams ap;
+        ap.kind = ActivationKind::GeLU;
+        ap.n_bits = nbits;
+        ap.f = 12;
+        ap.lut_bits = 8;
+        ap.clip = 3.0;
+        auto act_pair = activation_gen(ap, eng_f, dealer_f);
+        BeaverPool fused_pool0(cfg_f, 0xABCD00, 0);
+        BeaverPool fused_pool1(cfg_f, 0xABCD00, 1);
+        BeaverPool ref_pool0(cfg_f, 0xABCD00, 0);
+        BeaverPool ref_pool1(cfg_f, 0xABCD00, 1);
+        bool ok = true;
+        for (int i = -12; i <= 12; ++i) {
+            u64 x_ring = ringf.from_signed(i);
+            auto shares = dealer_f.share_value(x_ring);
+            auto fused = fused_trunc_activation_eval(cfg_f,
+                                                     trunc_pair.k0,
+                                                     trunc_pair.k1,
+                                                     &act_pair.k0,
+                                                     &act_pair.k1,
+                                                     fused_pool0,
+                                                     fused_pool1,
+                                                     shares.first,
+                                                     shares.second,
+                                                     eng_f);
+
+            auto trunc_ref = lrs_eval_from_share_pair(cfg_f, trunc_pair.k0, trunc_pair.k1, shares.first, shares.second, eng_f);
+            u64 hat = ring_add(cfg_f,
+                               ring_add(cfg_f, share_value(trunc_ref.first), share_value(trunc_ref.second)),
+                               act_pair.k0.r_in);
+            auto eval0 = activation_eval_main(0, act_pair.k0, hat, eng_f);
+            auto eval1 = activation_eval_main(1, act_pair.k1, hat, eng_f);
+            Share ref0 = activation_finish(cfg_f, act_pair.k0, eval0, ref_pool0);
+            Share ref1 = activation_finish(cfg_f, act_pair.k1, eval1, ref_pool1);
+
+            u64 fused_hat = ring_add(cfg_f, share_value(fused.first), share_value(fused.second));
+            u64 ref_hat = ring_add(cfg_f, share_value(ref0), share_value(ref1));
+            if (fused_hat != ref_hat) {
+                ok = false;
+                break;
+            }
+        }
+        std::cout << "Fused trunc+activation helper test: " << (ok ? "ok" : "FAIL") << std::endl;
         assert(ok);
     }
 

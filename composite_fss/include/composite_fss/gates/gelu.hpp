@@ -5,12 +5,8 @@
 #include "../sharing.hpp"
 #include "../beaver.hpp"
 #include "../suf.hpp"
-#include "../suf_packing.hpp"
-#include "../suf_to_lut.hpp"
-#include "../suf_unpack.hpp"
 #include <algorithm>
 #include <cmath>
-#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -38,19 +34,12 @@ struct ActivationIndexingInfo {
     std::uint64_t clip_mag = 0;
 };
 
-struct ActivationChannels {
-    SufChannelId relu_value;
-    SufChannelId delta_value;
-    SufChannelId relu_bit;
-};
-
 struct ActivationKey {
     ActivationKind kind = ActivationKind::GeLU;
     unsigned n_bits = 16;
     unsigned f = 8;
     std::uint64_t r_in = 0;
-    PackedSufProgram main_prog;
-    ActivationChannels channels;
+    SufCompiled compiled;
     ActivationIndexingInfo info;
 };
 
@@ -93,25 +82,23 @@ inline ActivationIndexingInfo make_index_info(const ActivationParams &p) {
     return info;
 }
 
-inline std::pair<SufDesc, ActivationChannels> build_activation_suf(const ActivationParams &p,
-                                                                   std::uint64_t r_in,
-                                                                   std::uint64_t r_out,
-                                                                   const ActivationIndexingInfo &info) {
+inline SufDesc build_activation_suf(const ActivationParams &p,
+                                    std::uint64_t r_in,
+                                    const ActivationIndexingInfo &info) {
+    if (p.n_bits >= 63) {
+        throw std::runtime_error("activation SUF LUT backend supports n_bits < 63");
+    }
     Ring64 ring(p.n_bits);
     SufDesc suf;
     suf.shape.domain_bits = p.n_bits;
     suf.r_outputs = 2;      // ReLU value + delta value
     suf.l_outputs = 1;      // relu bit
-    suf.degree = 1;
+    suf.degree = 0;
     suf.r_in = r_in;
     suf.r_out = 0;          // outputs left unmasked; masking handled externally if needed
 
-    SufChannelId val_ch = suf.shape.add_channel("relu_val", SufFieldKind::Ring, p.n_bits, 1);
-    SufChannelId delta_ch = suf.shape.add_channel("delta_val", SufFieldKind::Ring, p.n_bits, 1);
-    SufChannelId relu_bit_ch = suf.shape.add_channel("relu_bit", SufFieldKind::Bool, 1, 1);
-
     std::size_t domain_size = 1ULL << p.n_bits;
-    suf.alpha.reserve(domain_size);
+    suf.alpha.reserve(domain_size + 1);
     suf.polys.reserve(domain_size);
     suf.bools.reserve(domain_size);
 
@@ -139,13 +126,16 @@ inline std::pair<SufDesc, ActivationChannels> build_activation_suf(const Activat
         suf.polys.push_back(std::move(pv));
 
         std::vector<BoolExpr> bvec(1);
-        bvec[0].kind = BoolExpr::CONST;
-        bvec[0].const_value = (xs >= 0);
+        bvec[0].kind = BoolExpr::MSB;
+        BoolExpr not_msb;
+        not_msb.kind = BoolExpr::NOT;
+        not_msb.children = {bvec[0]};
+        bvec[0] = not_msb;
         suf.bools.push_back(std::move(bvec));
     }
 
-    ActivationChannels channels{val_ch, delta_ch, relu_bit_ch};
-    return {suf, channels};
+    suf.alpha.push_back(static_cast<std::uint64_t>(domain_size));
+    return suf;
 }
 
 inline ActivationKeyPair activation_gen(const ActivationParams &input_params,
@@ -161,16 +151,15 @@ inline ActivationKeyPair activation_gen(const ActivationParams &input_params,
     std::uint64_t r_in = 0; // keep GeLU unmasked on input to stabilize SUF layout
 
     ActivationIndexingInfo info = make_index_info(params);
-    auto suf_and_channels = build_activation_suf(params, r_in, 0, info);
-    auto packed = compile_suf_desc_packed(suf_and_channels.first, engine, std::nullopt, params.n_bits);
+    SufDesc suf = build_activation_suf(params, r_in, info);
+    auto compiled = compile_suf_to_pdpf_packed(suf, engine);
 
     ActivationKey key;
     key.kind = params.kind;
     key.n_bits = params.n_bits;
     key.f = params.f;
     key.r_in = r_in;
-    key.main_prog = packed;
-    key.channels = suf_and_channels.second;
+    key.compiled = compiled;
     key.info = info;
 
     ActivationKeyPair pair;
@@ -183,20 +172,21 @@ inline ActivationEvalResult activation_eval_main(int party,
                                                  const ActivationKey &key,
                                                  std::uint64_t x_hat,
                                                  PdpfEngine &engine) {
-    std::vector<std::uint64_t> out(key.main_prog.layout.num_words);
-    engine.eval_share(key.main_prog.compiled.pdpf_program, party, x_hat, out);
-    std::vector<Share> share_words;
-    share_words.reserve(out.size());
-    for (auto w : out) {
-        share_words.emplace_back(party, w);
-    }
-    RingConfig cfg = make_ring_config(key.n_bits);
+    std::size_t words = key.compiled.output_words ? key.compiled.output_words : 1;
+    std::vector<std::uint64_t> out(words);
+    engine.eval_share(key.compiled.pdpf_program, party, x_hat, out);
     ActivationEvalResult res;
-    res.relu_value = suf_unpack_channel_share(cfg, key.main_prog.layout, key.channels.relu_value, 0, share_words);
-    res.delta_value = suf_unpack_channel_share(cfg, key.main_prog.layout, key.channels.delta_value, 0, share_words);
-    res.relu_bit = suf_unpack_channel_share(cfg, key.main_prog.layout, key.channels.relu_bit, 0, share_words);
+    res.relu_value = Share{party, out.size() > 0 ? out[0] : 0ULL};
+    res.delta_value = Share{party, out.size() > 1 ? out[1] : 0ULL};
+    std::size_t bool_idx = key.compiled.arith_words;
+    std::uint64_t bit_word = (bool_idx < out.size()) ? out[bool_idx] : 0ULL;
+    res.relu_bit = Share{party, bit_word & 1ULL};
 #if COMPOSITE_FSS_INTERNAL
-    res.packed_words = std::move(share_words);
+    res.packed_words.clear();
+    res.packed_words.reserve(out.size());
+    for (auto w : out) {
+        res.packed_words.emplace_back(party, w);
+    }
 #endif
     return res;
 }

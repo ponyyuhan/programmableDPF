@@ -35,6 +35,11 @@ int main(int argc, char **argv) {
 
     if (gate == "relu") {
         auto kp = relu_gen(n_bits, engine, dealer);
+        for (auto &h : hats) {
+            std::int64_t s = static_cast<std::int64_t>(rng() % (1ULL << (n_bits - 1)));
+            u64 x = ring.from_signed(s);
+            h = ring.add(x, kp.k0.r_in);
+        }
         std::vector<std::vector<u64>> outs(batch);
         engine.eval_share_batch(kp.k0.compiled.pdpf_program, 0, hats, outs);
     } else {
@@ -45,6 +50,11 @@ int main(int argc, char **argv) {
         gp.lut_bits = 8;
         gp.clip = 3.0;
         auto kp = gelu_gen(gp, engine, dealer);
+        for (auto &h : hats) {
+            std::int64_t s = static_cast<std::int64_t>(rng() % (1ULL << (n_bits - 1)));
+            u64 x = ring.from_signed(s);
+            h = ring.add(x, kp.k0.r_in);
+        }
         RingConfig cfg = make_ring_config(n_bits);
         BeaverPool pool0(cfg, 0xABCDEF, 0);
         BeaverPool pool1(cfg, 0xABCDEF, 1);
